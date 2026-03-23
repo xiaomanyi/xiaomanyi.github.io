@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>如意识字</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "PingFang SC", "幼圆", sans-serif;
+            -webkit-tap-highlight-color: transparent; /* 手机端点击阴影彻底移除 */
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            background: #f8f9ff;
+            min-height: 100vh;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .level-page {
+            display: block;
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .title {
+            font-size: 36px;
+            color: #6b72ff;
+            margin: 20px 0 5px 0;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #888fc8;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .btn-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .data-btn, .mix-mode-btn {
+            padding: 12px 25px;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 140px;
+            background: #6b72ff;
+        }
+        .mix-mode-btn {
+            background: #4cc0ff;
+        }
+        .data-btn:active, .mix-mode-btn:active {
+            transform: scale(0.96);
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            padding: 15px;
+        }
+
+        .level-btn {
+            padding: 20px 10px;
+            border: none;
+            border-radius: 22px;
+            background: #ffffff;
+            color: #6b72ff;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 3px solid #e1e4ff;
+        }
+        .level-btn:hover {
+            background: #6b72ff;
+            color: #fff;
+        }
+        .level-btn.active {
+            background: #6b72ff;
+            color: white;
+            border-color: #5a61e8;
+        }
+        .level-btn:active {
+            transform: scale(0.96);
+            box-shadow: none !important;
+        }
+
+        /* 组合模式 */
+        .mix-panel {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin: 20px 0;
+            border: 2px solid #e1e4ff;
+        }
+        .mix-levels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        .mix-level-item {
+            padding: 8px 12px;
+            background: #f1f3ff;
+            border-radius: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .mix-level-item.selected {
+            background: #4cc0ff;
+            color: white;
+            box-shadow: 0 0 6px rgba(76, 192, 255, 0.3);
+        }
+        .mix-input {
+            padding: 10px;
+            width: 100px;
+            text-align: center;
+            border-radius: 12px;
+            border: 2px solid #e1e4ff;
+            margin: 10px;
+            font-size: 16px;
+        }
+        .mix-start-btn {
+            padding: 12px 30px;
+            background: #4cc0ff;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* 学习页面 */
+        .study-page, .mix-study-page {
+            display: none;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 18px;
+            background: #6b72ff;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .back-btn:active {
+            transform: scale(0.96);
+            box-shadow: none;
+        }
+
+        .current-level {
+            font-size: 22px;
+            font-weight: bold;
+            color: #6b72ff;
+            margin: 5px 0;
+        }
+
+        .count-info {
+            display: flex;
+            justify-content: space-around;
+            margin: 10px 0;
+            font-size: 18px;
+            color: #666;
+            font-weight: bold;
+        }
+        .count-info span {
+            width: 130px;
+            display: inline-block;
+        }
+
+        .word-card {
+            width: 280px;
+            height: 280px;
+            background: #ffffff;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 120px;
+            font-weight: bold;
+            color: #444;
+            margin: 20px auto;
+            border: 6px solid #d5d9ff;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 15px 0;
+        }
+
+        .know-btn, .unknow-btn {
+            padding: 18px 30px;
+            border: none;
+            border-radius: 22px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.25s ease;
+        }
+        .know-btn {
+            background: #e6f7e8;
+            color: #3a9e52;
+            border: 3px solid #c1e9c5;
+        }
+        .unknow-btn {
+            background: #ffe5e5;
+            color: #d95353;
+            border: 3px solid #f5c6c6;
+        }
+        .know-btn:active, .unknow-btn:active {
+            transform: scale(0.95);
+            box-shadow: none !important;
+        }
+
+        /* 显示全部汉字 自适应高度 */
+        .toggle-all-btn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 16px;
+            background: #80abff;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .toggle-all-btn:active {
+            transform: scale(0.96);
+            box-shadow: none !important;
+        }
+
+        .all-words {
+            display: none;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: #ffffff;
+            border-radius: 18px;
+            border: 3px solid #e1e4ff;
+            height: auto !important;
+            max-height: none !important;
+            opacity: 1 !important;
+            overflow: visible;
+        }
+
+        .word-item {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9ff;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            border: 2px solid #e1e4ff;
+        }
+        .word-item.unknow {
+            color: #fff;
+            background: #ff6b6b;
+            border-color: #ff4c4c;
+            font-weight: bold;
+            transform: scale(1.05);
+        }
+
+        /* 结果页面 */
+        .result-page, .mix-result-page {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            padding: 30px 20px;
+            background: white;
+            border-radius: 25px;
+            border: 4px solid #d5d9ff;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            z-index: 999;
+        }
+
+        .stars {
+            font-size: 32px;
+            margin: 15px 0;
+            min-height: 40px;
+        }
+        .star {
+            display: inline-block;
+            opacity: 0.2;
+            transform: scale(0.8);
+            transition: all 0.6s ease;
+            margin: 0 3px;
+        }
+        .star.active {
+            opacity: 1;
+            transform: scale(1);
+            color: #ffd700;
+        }
+
+        .result-text {
+            font-size: 20px;
+            line-height: 1.8;
+            color: #555;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .review-btn, .back-home-btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .review-btn { background: #6b72ff; color: white; }
+        .back-home-btn { background: #80abff; color: white; }
+        .review-btn:active, .back-home-btn:active {
+            transform: scale(0.96);
+            box-shadow: none !important;
+        }
+
+        /* 复习页面 */
+        .review-page {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #f8f9ff;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+        .review-word-card {
+            width: 300px;
+            height: 300px;
+            background: #fff;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 140px;
+            font-weight: bold;
+            color: #444;
+            border: 6px solid #d5d9ff;
+            margin-bottom: 40px;
+        }
+        .review-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .review-prev-btn, .review-next-btn, .review-back-btn {
+            padding: 18px 30px;
+            border: none;
+            border-radius: 22px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .review-prev-btn { background: #80abff; color: #fff; }
+        .review-next-btn { background: #6b72ff; color: #fff; }
+        .review-back-btn { background: #ff8fa3; color: #fff; margin-top: 10px; }
+
+        /* 数据页面 */
+        .data-page {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 420px;
+            padding: 22px;
+            background: white;
+            border-radius: 25px;
+            border: 4px solid #d5d9ff;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .data-title { font-size: 26px; color: #6b72ff; margin-bottom: 12px; }
+        .total-info { font-size: 18px; font-weight: bold; margin: 8px 0; color: #6b72ff; }
+        .level-data-list {
+            text-align: center; margin:12px 0; padding:10px; background:#f8f9ff;
+            border-radius:12px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px;
+        }
+        .level-item { padding:4px 8px; font-size:15px; font-weight:bold; color:#666; background:#e1e4ff; border-radius:6px; }
+        .pie-container { width:140px; height:140px; margin:10px auto; position:relative; }
+        .data-btn-row { display:flex; justify-content:center; gap:10px; margin:10px 0; }
+        .show-known-words-btn, .reset-data-btn {
+            padding:10px 20px; border:none; border-radius:16px; font-size:16px; font-weight:bold; cursor:pointer; flex:1; max-width:140px;
+        }
+        .show-known-words-btn { background:#6b72ff; color:white; }
+        .reset-data-btn { background:#ff6b6b; color:white; }
+        .close-data-btn { padding:10px 25px; background:#6b72ff; color:white; border:none; border-radius:18px; font-size:17px; font-weight:bold; cursor:pointer; }
+
+        /* 弹窗 */
+        .known-words-modal {
+            display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+            width:90%; max-width:400px; max-height:70vh; overflow-y:auto;
+            background:white; border-radius:20px; border:4px solid #d5d9ff; padding:20px; text-align:center;
+            box-shadow:0 10px 30px rgba(0,0,0,0.05);
+        }
+        .known-title { font-size:22px; color:#6b72ff; margin-bottom:15px; font-weight:bold; }
+        .known-words-grid { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:15px; }
+        .close-known-btn { padding:10px 25px; background:#6b72ff; color:white; border:none; border-radius:18px; font-size:16px; font-weight:bold; cursor:pointer; }
+
+        @media (max-width:400px) {
+            .title { font-size:30px; }
+            .word-card,.review-word-card { width:240px; height:240px; font-size:90px; }
+            .level-grid { grid-template-columns:repeat(3,1fr); }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 可用星星音效 替换后100%播放 -->
+    <audio id="starSound" preload="auto">
+        <source src="https://cdn.jsdelivr.net/npm/effect-sounds@1.0.0/sounds/star.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="level-page" id="levelPage">
+        <h1 class="title">🌟 学汉字 🌟</h1>
+        <div class="subtitle">每天认一认，识字小达人</div>
+        <div class="btn-row">
+            <button class="data-btn" onclick="showData()">学习数据</button>
+            <button class="mix-mode-btn" onclick="toggleMixMode()">组合测试</button>
+        </div>
+        <div class="mix-panel" id="mixPanel">
+            <h3>选择要练习的等级</h3>
+            <div class="mix-levels" id="mixLevels"></div>
+            <div>抽取字数：<input type="number" class="mix-input" id="mixCount" value="10" min="5" max="50"></div>
+            <button class="mix-start-btn" onclick="startMixStudy()">开始组合练习</button>
+        </div>
+        <div class="level-grid" id="levelGrid"></div>
+    </div>
+
+    <div class="study-page" id="studyPage">
+        <button class="back-btn" onclick="backToLevel()">返回</button>
+        <div class="current-level" id="currentLevelShow">当前等级：第1级</div>
+        <div class="count-info">
+            <span>总字数<span id="total">0</span></span>
+            <span>已认识<span id="know">0</span></span>
+            <span>本轮剩余<span id="remain">0</span></span>
+        </div>
+        <div class="word-card" id="wordCard">开始</div>
+        <div class="btn-group">
+            <button class="know-btn" onclick="checkWord(true)">已认识 ✅</button>
+            <button class="unknow-btn" onclick="checkWord(false)">不认识 ❌</button>
+        </div>
+        <button class="toggle-all-btn" id="toggleAllBtn" onclick="toggleAllWords()">显示第1级全部汉字</button>
+        <div class="all-words" id="allWords"></div>
+    </div>
+
+    <div class="mix-study-page" id="mixStudyPage">
+        <button class="back-btn" onclick="backToLevel()">返回首页</button>
+        <div class="current-level">组合练习模式</div>
+        <div class="count-info">
+            <span>总题数<span id="mixTotal">0</span></span>
+            <span>已认识<span id="mixKnow">0</span></span>
+            <span>当前题号<span id="mixCurrent">0</span></span>
+        </div>
+        <div class="word-card" id="mixWordCard">开始</div>
+        <div class="btn-group">
+            <button class="know-btn" onclick="mixCheckWord(true)">已认识 ✅</button>
+            <button class="unknow-btn" onclick="mixCheckWord(false)">不认识 ❌</button>
+        </div>
+    </div>
+
+    <div class="result-page" id="resultPage">
+        <h2 style="color:#6b72ff">学习完成！🎉</h2>
+        <div class="stars" id="stars"></div>
+        <div class="result-text" id="resultText"></div>
+        <button class="review-btn" onclick="startReview()">复习本次生字</button>
+        <button class="back-home-btn" onclick="backToLevel()">返回</button>
+    </div>
+
+    <div class="mix-result-page" id="mixResultPage">
+        <h2 style="color:#4cc0ff">组合练习完成！🎉</h2>
+        <div class="stars" id="mixStars"></div>
+        <div class="result-text" id="mixResultText"></div>
+        <button class="back-home-btn" onclick="backToLevel()">返回</button>
+    </div>
+
+    <div class="review-page" id="reviewPage">
+        <div class="review-word-card" id="reviewWordCard">字</div>
+        <div class="review-buttons">
+            <button class="review-prev-btn" onclick="prevReviewWord()">上一个</button>
+            <button class="review-next-btn" onclick="nextReviewWord()">下一个</button>
+        </div>
+        <button class="review-back-btn" onclick="backFromReview()">返回</button>
+    </div>
+
+    <div class="data-page" id="dataPage">
+        <h2 class="data-title">宝贝学习统计</h2>
+        <div class="total-info" id="totalInfo"></div>
+        <div class="pie-container"><canvas id="pieChart"></canvas></div>
+        <div class="level-data-list" id="levelDataList"></div>
+        <div class="data-btn-row">
+            <button class="show-known-words-btn" onclick="showAllKnownWords()">认识汇总</button>
+            <button class="reset-data-btn" onclick="resetAllData()">记录清零</button>
+        </div>
+        <button class="close-data-btn" onclick="closeData()">返回主页</button>
+    </div>
+
+    <div class="known-words-modal" id="knownWordsModal">
+        <h2 class="known-title">✨ 已认识的汉字 ✨</h2>
+        <div class="known-words-grid" id="knownWordsGrid"></div>
+        <button class="close-known-btn" onclick="closeKnownWords()">关闭</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const levelWords = {
+            1:["一","二","三","四","五","六","七","八","九","十","人","口","手","目","耳","头","日","月","水","火","山","石","田","土","木","禾","上","下","左","右","前","后","里","外","大","小","多","少","开","关","来","去","出","入","天","地","风","云","高","低","飞","白","儿","子","心","中","羊","山","走","跑","跳","坐","站","看","见","不","了"],
+            2:["爸","妈","我","你","他","她","它","们","哥","姐","弟","妹","爷","奶","家","门","床","桌","衣","食","花","草","树","叶","鸟","虫","鱼","马","牛","羊","吃","喝","说","话","问","答","好","坏","冷","热","快","慢","长","短","方","圆","东","西","南","北","早","晚","光","明","星","空","雨","雪","声","音"],
+            3:["春","夏","秋","冬","学","校","老","师","书","本","笔","纸","车","船","米","面","饭","菜","果","肉","鸡","蛋","红","黄","蓝","绿","白","黑","干","湿","远","近","工","厂","种","采","洗","扫","写","画","读","报","歌","舞","游","戏","朋","友","父","母","自","己","身","体","力","气","生","活"],
+            4:["深","浅","粗","细","软","硬","轻","重","空","满","新","旧","美","丽","香","甜","苦","辣","酸","咸","温","暖","凉","爽","静","闹","忙","闲","真","假","对","错","爱","恨","想","念","喜","欢","高","兴","难","易","强","弱","胜","负","合","分","主","次","公","主","王","子","飞","升","落","降"],
+            5:["知","道","认","识","明","白","懂","得","学","会","记","住","忘","记","思","考","答","案","讲","述","表","示","告","诉","谈","论","帮","助","支","持","保","护","照","顾","尊","敬","友","好","热","情","礼","貌","诚","实","勇","敢","刚","才","已","经","正","在","将","要"],
+            6:["城","市","乡","村","家","园","森","林","湖","海","河","流","平","原","沙","漠","冰","雪","雷","雨","风","暴","雾","霜","露","雹","朝","夕","晨","昏","季","节","年","月","日","时","分","秒","群","众","只","条","支","本","把","间","片","点","位","次"],
+            7:["工","人","农","民","医","生","司","机","教","师","战","士","科","学","艺","术","建","筑","制","造","服","务","交","通","通","信","商","店","银","行","邮","局","电","视","电","话","电","脑","网","络","图","书","报","刊","广","播","电","影","突","然","忽","然"],
+            8:["健","康","安","全","快","乐","幸","福","平","安","团","结","友","爱","和","平","文","明","文","化","科","技","创","造","发","展","进","步","美","好","未","来","希","望","梦","想","努","力","坚","持","成","功","收","获","成","长","自","信","原","来","常","常"],
+            9:["众","多","许","多","都","只","才","就","再","又","很","更","最","太","极","十","分","特","别","然","后","因","为","所","以","如","果","虽","然","但","是","而","且","不","但","而","且","与","其","不","如","只","要","就","只","有","才","无","论","都"],
+            10:["每","各","别","另","其","它","一","切","全","部","任","何","其","中","其","实","自","然","既","然","既","又","一","边","一","边","有","的","有","的","还","有","不","仅","而","且","甚","至","尤","其","居","然","竟","然","仿","佛","好","像"]
+        };
+
+        let currentLevel = 1;
+        let allWords = [];
+        let randomWords = [];
+        let knowWords = [];
+        let unknowWords = [];
+        let currentWordIndex = 0;
+        let reviewWords = [];
+        let reviewIndex = 0;
+        let studyData = JSON.parse(localStorage.getItem('studyData')) || {};
+        let pieChart = null;
+
+        let mixSelectedLevels = [];
+        let mixTotalWords = [];
+        let mixRandomWords = [];
+        let mixKnowCount = 0;
+        let mixCurrentIndex = 0;
+        let mixTotalCount = 0;
+
+        function initLevels() {
+            const grid = document.getElementById('levelGrid');
+            const mixLevelContainer = document.getElementById('mixLevels');
+            for(let i=1;i<=10;i++){
+                const btn = document.createElement('button');
+                btn.className = 'level-btn';
+                if(i===1) btn.classList.add('active');
+                btn.innerText = `第${i}级`;
+                btn.onclick = ()=>selectLevel(i);
+                grid.appendChild(btn);
+                const mixItem = document.createElement('div');
+                mixItem.className = 'mix-level-item';
+                mixItem.innerText = `第${i}级`;
+                mixItem.dataset.level = i;
+                mixItem.onclick = ()=>{
+                    mixItem.classList.toggle('selected');
+                    updateMixSelectedLevels();
+                };
+                mixLevelContainer.appendChild(mixItem);
+            }
+        }
+
+        function playStarSound() {
+            const sound = document.getElementById('starSound');
+            sound.currentTime = 0;
+            sound.play().catch(e=>console.log(e));
+        }
+
+        function toggleMixMode() {
+            const panel = document.getElementById('mixPanel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function updateMixSelectedLevels() {
+            const items = document.querySelectorAll('.mix-level-item.selected');
+            mixSelectedLevels = Array.from(items).map(i=>parseInt(i.dataset.level));
+        }
+
+        function startMixStudy() {
+            if(mixSelectedLevels.length===0){alert('请至少选一个等级');return;}
+            const c = parseInt(document.getElementById('mixCount').value);
+            if(c<5||c>50){alert('5-50个');return;}
+            mixTotalWords=[];
+            mixSelectedLevels.forEach(l=>mixTotalWords.push(...levelWords[l]));
+            mixRandomWords = [...mixTotalWords].sort(()=>Math.random()-0.5).slice(0,c);
+            mixKnowCount=0;mixCurrentIndex=0;mixTotalCount=c;
+            document.getElementById('mixTotal').textContent=c;
+            document.getElementById('mixKnow').textContent=0;
+            document.getElementById('mixCurrent').textContent=1;
+            document.getElementById('mixWordCard').textContent=mixRandomWords[0];
+            document.getElementById('levelPage').style.display='none';
+            document.getElementById('mixStudyPage').style.display='block';
+        }
+
+        function mixCheckWord(k){
+            if(k) mixKnowCount++;
+            mixCurrentIndex++;
+            if(mixCurrentIndex>=mixTotalCount){showMixResult();return;}
+            document.getElementById('mixKnow').textContent=mixKnowCount;
+            document.getElementById('mixCurrent').textContent=mixCurrentIndex+1;
+            document.getElementById('mixWordCard').textContent=mixRandomWords[mixCurrentIndex];
+        }
+
+        function showMixResult(){
+            document.getElementById('mixStudyPage').style.display='none';
+            document.getElementById('mixResultPage').style.display='block';
+            const s=Math.round(mixKnowCount/mixTotalCount*100);
+            let sc=0;
+            if(s>=90)sc=5;else if(s>=70)sc=4;else if(s>=50)sc=3;else if(s>=30)sc=2;else sc=1;
+            animateMixStars(sc);
+            document.getElementById('mixResultText').innerText=`总题数：${mixTotalCount}\n正确：${mixKnowCount}\n得分：${s}分`;
+        }
+
+        function selectLevel(level){
+            currentLevel=level;
+            allWords=[...new Set(levelWords[level])];
+            randomWords=[...allWords].sort(()=>Math.random()-0.5);
+            knowWords=[];unknowWords=[];currentWordIndex=0;
+            document.querySelectorAll('.level-btn').forEach(b=>b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('total').innerText=allWords.length;
+            document.getElementById('know').innerText=0;
+            document.getElementById('remain').innerText=allWords.length;
+            document.getElementById('currentLevelShow').innerText=`当前等级：第${currentLevel}级`;
+            document.getElementById('toggleAllBtn').innerText=`显示第${currentLevel}级全部汉字`;
+            const box=document.getElementById('allWords');
+            box.classList.remove('show');
+            box.style.display='none';
+            document.getElementById('levelPage').style.display='none';
+            document.getElementById('studyPage').style.display='block';
+            document.getElementById('resultPage').style.display='none';
+            document.getElementById('reviewPage').style.display='none';
+            showWord();
+        }
+
+        function showWord(){
+            if(currentWordIndex>=randomWords.length){saveStudyData();showResult();return;}
+            const w=randomWords[currentWordIndex];
+            document.getElementById('wordCard').innerText=w;
+            document.getElementById('remain').innerText=randomWords.length-currentWordIndex;
+        }
+
+        function checkWord(k){
+            const w=randomWords[currentWordIndex];
+            k?knowWords.push(w):unknowWords.push(w);
+            document.getElementById('know').innerText=knowWords.length;
+            currentWordIndex++;
+            showWord();
+            renderAllWords();
+        }
+
+        function toggleAllWords(){
+            const box=document.getElementById('allWords');
+            const btn=document.getElementById('toggleAllBtn');
+            if(box.style.display==='flex'){
+                box.style.display='none';
+                btn.innerText=`显示第${currentLevel}级全部汉字`;
+            }else{
+                box.style.display='flex';
+                btn.innerText=`关闭第${currentLevel}级全部汉字`;
+                renderAllWords();
+            }
+        }
+
+        function renderAllWords(){
+            const box=document.getElementById('allWords');
+            box.innerHTML='';
+            allWords.forEach(w=>{
+                const d=document.createElement('div');
+                d.className='word-item';
+                d.innerText=w;
+                if(unknowWords.includes(w))d.classList.add('unknow');
+                box.appendChild(d);
+            });
+        }
+
+        function animateStars(c){
+            playStarSound();
+            const con=document.getElementById('stars');
+            con.innerHTML='';
+            for(let i=0;i<5;i++){
+                const s=document.createElement('span');
+                s.className='star';
+                s.innerText='⭐';
+                con.appendChild(s);
+            }
+            const stars=document.querySelectorAll('.star');
+            let x=0;
+            const t=setInterval(()=>{
+                if(x<c){stars[x].classList.add('active');x++;}
+                else clearInterval(t);
+            },300);
+        }
+
+        function animateMixStars(c){
+            playStarSound();
+            const con=document.getElementById('mixStars');
+            con.innerHTML='';
+            for(let i=0;i<5;i++){
+                const s=document.createElement('span');
+                s.className='star';
+                s.innerText='⭐';
+                con.appendChild(s);
+            }
+            const stars=document.querySelectorAll('.star');
+            let x=0;
+            const t=setInterval(()=>{
+                if(x<c){stars[x].classList.add('active');x++;}
+                else clearInterval(t);
+            },300);
+        }
+
+        function showResult(){
+            document.getElementById('studyPage').style.display='none';
+            document.getElementById('resultPage').style.display='block';
+            const t=allWords.length;
+            const k=knowWords.length;
+            const s=k>=9?5:k>=7?4:k>=5?3:k>=3?2:1;
+            animateStars(s);
+            document.getElementById('resultText').innerText=`本次：${t}字\n已会：${k}个 | 不会：${unknowWords.length}个`;
+        }
+
+        function startReview(){
+            if(unknowWords.length===0){backToLevel();return;}
+            reviewWords=[...unknowWords];reviewIndex=0;
+            document.getElementById('resultPage').style.display='none';
+            document.getElementById('reviewPage').style.display='flex';
+            showReviewWord();
+        }
+
+        function showReviewWord(){document.getElementById('reviewWordCard').innerText=reviewWords[reviewIndex];}
+        function prevReviewWord(){reviewIndex=(reviewIndex-1+reviewWords.length)%reviewWords.length;showReviewWord();}
+        function nextReviewWord(){reviewIndex=(reviewIndex+1)%reviewWords.length;showReviewWord();}
+        function backFromReview(){document.getElementById('reviewPage').style.display='none';backToLevel();}
+
+        function backToLevel(){
+            document.getElementById('levelPage').style.display='block';
+            document.getElementById('studyPage').style.display='none';
+            document.getElementById('resultPage').style.display='none';
+            document.getElementById('dataPage').style.display='none';
+            document.getElementById('reviewPage').style.display='none';
+            document.getElementById('mixStudyPage').style.display='none';
+            document.getElementById('mixResultPage').style.display='none';
+            document.getElementById('mixPanel').style.display='none';
+            document.getElementById('knownWordsModal').style.display='none';
+        }
+
+        function saveStudyData(){
+            studyData[currentLevel]={total:allWords.length,know:knowWords.length};
+            localStorage.setItem('studyData',JSON.stringify(studyData));
+        }
+
+        function showData(){
+            document.getElementById('levelPage').style.display='none';
+            document.getElementById('dataPage').style.display='block';
+            let gt=0,gk=0,list='';
+            for(let i=1;i<=10;i++){
+                const t=levelWords[i].length;
+                const k=(studyData[i]||{}).know||0;
+                gt+=t;gk+=k;
+                list+=`<div class="level-item">${i}级:会${k}/${t}</div>`;
+            }
+            document.getElementById('totalInfo').innerText=`总字数：${gt}｜已学会：${gk}`;
+            document.getElementById('levelDataList').innerHTML=list;
+            const ctx=document.getElementById('pieChart').getContext('2d');
+            if(pieChart)pieChart.destroy();
+            pieChart=new Chart(ctx,{
+                type:'pie',
+                data:{labels:['已会','未会'],datasets:[{data:[gk,gt-gk],backgroundColor:['#c1e9c5','#f5c6c6'],borderWidth:0}]},
+                options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'none',labels:{font:{size:14,weight:'bold'}}}}}
+            });
+        }
+
+        function showAllKnownWords(){
+            document.getElementById('dataPage').style.display='none';
+            document.getElementById('knownWordsModal').style.display='block';
+            const g=document.getElementById('knownWordsGrid');
+            g.innerHTML='';
+            let a=[];
+            for(let i=1;i<=10;i++){
+                const k=(studyData[i]||{}).know||0;
+                if(k>0)a=a.concat(levelWords[i].slice(0,k));
+            }
+            if(a.length===0)g.innerHTML='<div style="padding:20px;color:#888">暂无已认识汉字</div>';
+            else a.forEach(w=>{const d=document.createElement('div');d.className='word-item';d.innerText=w;g.appendChild(d);});
+        }
+
+        function closeKnownWords(){document.getElementById('knownWordsModal').style.display='none';document.getElementById('dataPage').style.display='block';}
+        function resetAllData(){if(confirm('确定清零？')){studyData={};localStorage.setItem('studyData',JSON.stringify(studyData));alert('已清零');showData();}}
+        function closeData(){backToLevel();}
+        window.onload=initLevels;
+    </script>
+</body>
+</html>

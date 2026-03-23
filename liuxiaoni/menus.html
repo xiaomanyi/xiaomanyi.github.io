@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <script src="../js/check.js"></script>
+    <title>功能中心</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+            /* 移除手机点击高亮阴影 */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+        }
+
+        /* 一行3个网格 */
+        .grid-box {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        /* 高级毛玻璃透明卡片 */
+        .card {
+            background: rgba(255, 255, 255, 0.22);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 24px;
+            padding: 28px 12px;
+            font-size: 16px;
+            font-weight: 500;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.25s ease;
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.32);
+            transform: translateY(-3px);
+        }
+
+        /* 自适应布局 */
+        @media (max-width: 600px) {
+            .grid-box {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 380px) {
+            .grid-box {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body oncontextmenu="return false">
+
+    <div class="container">
+        <div class="grid-box">
+            <div class="card" onclick="go('./randomC.html')">安全员C证 刷题</div>
+            <!-- <div class="card" onclick="go('./testC.html')">安全员C证 模拟</div> -->
+        </div>
+    </div>
+
+<script>
+    // 跳转功能
+    function go(url) {
+        window.open(url, 'self');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <script src="./check.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>幼儿必背古诗</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #fff5f8;
+            min-height: 100vh;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 古诗卡片 + 序号定位 */
+        .poem-show {
+            width: 100%;
+            max-width: 500px;
+            max-height: 75vh;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 8px 24px rgba(255, 180, 200, 0.18);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
+
+        /* 可爱序号 */
+        .poem-index {
+            position: absolute;
+            top: 18px;
+            left: 20px;
+            width: 36px;
+            height: 36px;
+            background: #ff6ba1;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .poem-name {
+            font-size: 38px;
+            color: #ff5a8c;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .poem-writer {
+            font-size: 24px;
+            color: #999;
+            flex-shrink: 0;
+        }
+
+        .poem-text {
+            font-size: 36px;
+            line-height: 2.3;
+            color: #333;
+            white-space: pre-line;
+            width: 100%;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 30px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            font-size: 22px;
+            border-radius: 50px;
+            border: none;
+            background: #ff6ba1;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .btn:focus {
+            outline: none;
+        }
+
+        @media (max-width: 500px) {
+            .poem-name { font-size: 32px; }
+            .poem-writer { font-size: 20px; }
+            .poem-text { font-size: 28px; }
+            .btn { padding: 14px 26px; font-size: 20px; }
+            .poem-index { width: 32px; height: 32px; font-size: 16px; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="poem-show">
+        <div class="poem-index" id="indexNum">1</div>
+        <div class="poem-name" id="name">咏鹅</div>
+        <div class="poem-writer" id="writer">唐 · 骆宾王</div>
+        <div class="poem-text" id="text">鹅，鹅，鹅，
+曲项向天歌。
+白毛浮绿水，
+红掌拨清波。</div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn" onclick="prevPoem()">上一首</button>
+        <button class="btn" onclick="nextPoem()">下一首</button>
+    </div>
+
+    <script>
+        const poems = [
+            {
+                name: "咏鹅",
+                writer: "唐 · 骆宾王",
+                text: "鹅，鹅，鹅，\n曲项向天歌。\n白毛浮绿水，\n红掌拨清波。"
+            },
+            {
+                name: "静夜思",
+                writer: "唐 · 李白",
+                text: "床前明月光，\n疑是地上霜。\n举头望明月，\n低头思故乡。"
+            },
+            {
+                name: "春晓",
+                writer: "唐 · 孟浩然",
+                text: "春眠不觉晓，\n处处闻啼鸟。\n夜来风雨声，\n花落知多少。"
+            },
+            {
+                name: "悯农",
+                writer: "唐 · 李绅",
+                text: "锄禾日当午，\n汗滴禾下土。\n谁知盘中餐，\n粒粒皆辛苦。"
+            },
+            {
+                name: "登鹳雀楼",
+                writer: "唐 · 王之涣",
+                text: "白日依山尽，\n黄河入海流。\n欲穷千里目，\n更上一层楼。"
+            },
+            {
+                name: "相思",
+                writer: "唐 · 王维",
+                text: "红豆生南国，\n春来发几枝。\n愿君多采撷，\n此物最相思。"
+            },
+            {
+                name: "回乡偶书",
+                writer: "唐 · 贺知章",
+                text: "少小离家老大回，\n乡音无改鬓毛衰。\n儿童相见不相识，\n笑问客从何处来。"
+            },
+            {
+                name: "咏柳",
+                writer: "唐 · 贺知章",
+                text: "碧玉妆成一树高，\n万条垂下绿丝绦。\n不知细叶谁裁出，\n二月春风似剪刀。"
+            },
+            {
+                name: "望庐山瀑布",
+                writer: "唐 · 李白",
+                text: "日照香炉生紫烟，\n遥看瀑布挂前川。\n飞流直下三千尺，\n疑是银河落九天。"
+            },
+            {
+                name: "早发白帝城",
+                writer: "唐 · 李白",
+                text: "朝辞白帝彩云间，\n千里江陵一日还。\n两岸猿声啼不住，\n轻舟已过万重山。"
+            },
+            {
+                name: "赠汪伦",
+                writer: "唐 · 李白",
+                text: "李白乘舟将欲行，\n忽闻岸上踏歌声。\n桃花潭水深千尺，\n不及汪伦送我情。"
+            },
+            {
+                name: "黄鹤楼送孟浩然之广陵",
+                writer: "唐 · 李白",
+                text: "故人西辞黄鹤楼，\n烟花三月下扬州。\n孤帆远影碧空尽，\n唯见长江天际流。"
+            },
+            {
+                name: "九月九日忆山东兄弟",
+                writer: "唐 · 王维",
+                text: "独在异乡为异客，\n每逢佳节倍思亲。\n遥知兄弟登高处，\n遍插茱萸少一人。"
+            },
+            {
+                name: "竹里馆",
+                writer: "唐 · 王维",
+                text: "独坐幽篁里，\n弹琴复长啸。\n深林人不知，\n明月来相照。"
+            },
+            {
+                name: "鹿柴",
+                writer: "唐 · 王维",
+                text: "空山不见人，\n但闻人语响。\n返景入深林，\n复照青苔上。"
+            },
+            {
+                name: "送元二使安西",
+                writer: "唐 · 王维",
+                text: "渭城朝雨浥轻尘，\n客舍青青柳色新。\n劝君更尽一杯酒，\n西出阳关无故人。"
+            },
+            {
+                name: "赋得古原草送别",
+                writer: "唐 · 白居易",
+                text: "离离原上草，\n一岁一枯荣。\n野火烧不尽，\n春风吹又生。"
+            },
+            {
+                name: "池上",
+                writer: "唐 · 白居易",
+                text: "小娃撑小艇，\n偷采白莲回。\n不解藏踪迹，\n浮萍一道开。"
+            },
+            {
+                name: "忆江南",
+                writer: "唐 · 白居易",
+                text: "江南好，\n风景旧曾谙。\n日出江花红胜火，\n春来江水绿如蓝。\n能不忆江南？"
+            },
+            {
+                name: "小儿垂钓",
+                writer: "唐 · 胡令能",
+                text: "蓬头稚子学垂纶，\n侧坐莓苔草映身。\n路人借问遥招手，\n怕得鱼惊不应人。"
+            },
+            {
+                name: "望天门山",
+                writer: "唐 · 李白",
+                text: "天门中断楚江开，\n碧水东流至此回。\n两岸青山相对出，\n孤帆一片日边来。"
+            },
+            {
+                name: "绝句",
+                writer: "唐 · 杜甫",
+                text: "两个黄鹂鸣翠柳，\n一行白鹭上青天。\n窗含西岭千秋雪，\n门泊东吴万里船。"
+            },
+            {
+                name: "春夜喜雨",
+                writer: "唐 · 杜甫",
+                text: "好雨知时节，\n当春乃发生。\n随风潜入夜，\n润物细无声。"
+            },
+            {
+                name: "江畔独步寻花",
+                writer: "唐 · 杜甫",
+                text: "黄四娘家花满蹊，\n千朵万朵压枝低。\n留连戏蝶时时舞，\n自在娇莺恰恰啼。"
+            },
+            {
+                name: "寻隐者不遇",
+                writer: "唐 · 贾岛",
+                text: "松下问童子，\n言师采药去。\n只在此山中，\n云深不知处。"
+            },
+            {
+                name: "山行",
+                writer: "唐 · 杜牧",
+                text: "远上寒山石径斜，\n白云生处有人家。\n停车坐爱枫林晚，\n霜叶红于二月花。"
+            },
+            {
+                name: "清明",
+                writer: "唐 · 杜牧",
+                text: "清明时节雨纷纷，\n路上行人欲断魂。\n借问酒家何处有？\n牧童遥指杏花村。"
+            },
+            {
+                name: "江南春",
+                writer: "唐 · 杜牧",
+                text: "千里莺啼绿映红，\n水村山郭酒旗风。\n南朝四百八十寺，\n多少楼台烟雨中。"
+            },
+            {
+                name: "蜂",
+                writer: "唐 · 罗隐",
+                text: "不论平地与山尖，\n无限风光尽被占。\n采得百花成蜜后，\n为谁辛苦为谁甜？"
+            },
+            {
+                name: "风",
+                writer: "唐 · 李峤",
+                text: "解落三秋叶，\n能开二月花。\n过江千尺浪，\n入竹万竿斜。"
+            }
+        ];
+
+        let index = 0;
+
+        function updatePoem() {
+            const p = poems[index];
+            document.getElementById("indexNum").innerText = index + 1;
+            document.getElementById("name").innerText = p.name;
+            document.getElementById("writer").innerText = p.writer;
+            document.getElementById("text").innerText = p.text;
+            document.querySelector(".poem-show").scrollTop = 0;
+        }
+
+        function prevPoem() {
+            index = (index - 1 + poems.length) % poems.length;
+            updatePoem();
+        }
+
+        function nextPoem() {
+            index = (index + 1) % poems.length;
+            updatePoem();
+        }
+    </script>
+</body>
+</html>

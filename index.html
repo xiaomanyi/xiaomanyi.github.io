@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 禁止缩放 + 全设备适配 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 禁止复制选中 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>安全登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            /* 禁止选中文字 */
+            -webkit-user-select: none;
+            user-select: none;
+            /* 移除手机点击高亮阴影 */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            transition: background 0.5s;
+        }
+
+        /* 登录卡片 */
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        /* 随机表情 */
+        .emoji {
+            text-align: center;
+            font-size: 52px;
+            margin-bottom: 12px;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 26px;
+            color: #222;
+            margin-bottom: 8px;
+        }
+
+        .tips {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        /* 输入框组 */
+        .input-group {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 50px 16px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 14px;
+            font-size: 16px;
+            outline: none;
+            background: #f9f9f9;
+            -webkit-user-select: auto;
+            user-select: auto;
+        }
+
+        input:focus {
+            border-color: #667eea;
+            background: #fff;
+        }
+
+        /* 密码显隐按钮 */
+        .toggle-pwd {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            cursor: pointer;
+            color: #888;
+        }
+
+        /* 错误提示 */
+        .error {
+            color: #f44336;
+            font-size: 13px;
+            text-align: center;
+            margin: 0 0 16px;
+            height: 18px;
+            line-height: 18px;
+        }
+
+        /* 登录按钮 */
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: #667eea;
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 8px;
+        }
+
+        .login-btn:active {
+            transform: scale(0.97);
+            background: #5568d3;
+        }
+
+        /* 适配小屏 */
+        @media (max-width: 400px) {
+            .login-card {
+                padding: 32px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body oncontextmenu="return false"> <!-- 禁止右键 -->
+
+<div class="login-card">
+    <div class="emoji" id="emoji">😊</div>
+    <h2 class="title">欢迎回来</h2>
+    <div class="tips" id="tips">今日寄语</div>
+
+    <!-- 错误提示 -->
+    <div class="error" id="error"></div>
+
+    <div class="input-group">
+        <input type="text" id="username" placeholder="请输入用户名" autocomplete="off">
+    </div>
+
+    <div class="input-group">
+        <input type="password" id="password" placeholder="请输入密码">
+        <span class="toggle-pwd" id="toggle">👁️</span>
+    </div>
+
+    <button class="login-btn" onclick="login()">安全登录</button>
+</div>
+
+<script>
+    // ====================== 随机内容 ======================
+    const bgList = [
+        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        // 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        // 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        // 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        // 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+    ];
+
+    const emojiList = ['😊', '🌟', '🍀', '📚', '💻', '🌿', '🐳', '✨', '🎵', '☀️'];
+    const textList = [
+        '保持热爱，奔赴山海',
+        '今天也要元气满满',
+        '生活藏着温柔的惊喜',
+        '你逆光而来，配得上所有美好',
+        '慢慢来，谁都有发光的机会'
+    ];
+
+    function random(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    // 赋值随机内容
+    document.body.style.background = random(bgList);
+    document.getElementById('emoji').innerText = random(emojiList);
+    document.getElementById('tips').innerText = random(textList);
+
+    // ====================== 密码显隐 ======================
+    const pwdInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('toggle');
+    toggleBtn.onclick = () => {
+        pwdInput.type = pwdInput.type === 'password' ? 'text' : 'password';
+        toggleBtn.innerText = pwdInput.type === 'password' ? '👁️' : '🙈';
+    };
+
+    // ====================== 错误提示控制 ======================
+    const errEl = document.getElementById('error');
+    const userInput = document.getElementById('username');
+
+    // 输入时隐藏错误
+    userInput.oninput = () => errEl.innerText = '';
+    pwdInput.oninput = () => errEl.innerText = '';
+    const userList = [
+        { username: "user", password: "123",file:"huihui", url: "./huihui/menus.html" },
+        { username: "刘小妮", password: "123",file:"liuxiaoni", url: "./liuxiaoni/menus.html" },
+        { username: "如意", password: "123",file:"ruyi", url: "./ruyi/menus.html" },
+        { username: "吴乙默", password: "66",file:"66", url: "./wu/" }
+    ];
+
+    function login() {
+        let username = userInput.value.trim();
+        let password = pwdInput.value.trim();
+
+        // 验证
+        const user = userList.find(u => u.username === username && u.password === password);
+
+        if (user) {
+            // sessionStorage.setItem('isLogin', 'ok');
+            const randomToken = Math.random().toString(36).slice(2) + Date.now().toString(36);
+            sessionStorage.setItem('loginToken', randomToken);
+            window.location.href = user.url;
+        } else {
+            errEl.innerText = '用户名或密码错误，请重新输入';
+            // 清空输入框
+            userInput.value = '';
+            pwdInput.value = '';
+        }
+    }
+</script>
+</body>
+</html>
