@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <script src="../js/check.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语情景对话</title>
+    <style>
+        * {
+            margin:0; padding:0; box-sizing:border-box;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: linear-gradient(135deg, #fefbf3, #e6f9ff);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .container {
+            max-width: 840px;
+            margin: 0 auto;
+        }
+        .title {
+            text-align: center;
+            color: #4a91e6;
+            font-size: 30px;
+            margin: 8px 0 4px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+        .scene-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+        .scene-btn {
+            padding: 9px 14px;
+            background: #fff;
+            border: 2px solid #91d4f4;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #444;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: none;
+            outline: none;
+        }
+        .scene-btn:hover,
+        .scene-btn.active {
+            background: #4a91e6;
+            color: white;
+            border-color: #4a91e6;
+        }
+
+        .dialog-box {
+            background: #fff;
+            border-radius: 20px;
+            padding: 22px;
+            min-height: 320px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+        }
+        .dialog-title {
+            color: #4a91e6;
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        .chat {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .teacher { align-items: flex-start; }
+        .kid { align-items: flex-end; }
+
+        .bubble {
+            max-width: 75%;
+            padding: 11px 14px;
+            border-radius: 14px;
+            font-size: 16px;
+            line-height: 1.5;
+            cursor: pointer;
+            transition: transform 0.15s;
+            user-select: none;
+        }
+        .bubble:active {
+            transform: scale(0.98);
+        }
+        .teacher-bubble {
+            background: #e6f9ff;
+            border: 2px solid #91d4f4;
+            border-bottom-left-radius: 6px;
+        }
+        .kid-bubble {
+            background: #fff3f8;
+            border: 2px solid #f9a8d4;
+            border-bottom-right-radius: 6px;
+        }
+
+        .name {
+            font-size: 13px;
+            color: #777;
+            padding: 0 6px;
+            font-weight: bold;
+        }
+
+        .empty {
+            text-align: center;
+            color: #999;
+            padding: 60px 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <p class="subtitle">妈妈 & 如意 轻松练口语 · 小班版</p>
+
+    <div class="scene-box">
+        <button class="scene-btn" data-scene="greeting">问候问好</button>
+        <button class="scene-btn" data-scene="introduce">自我介绍</button>
+        <button class="scene-btn" data-scene="thanks">感谢礼貌</button>
+        <button class="scene-btn" data-scene="apology">道歉礼貌</button>
+        <button class="scene-btn" data-scene="food">喜欢的食物</button>
+        <button class="scene-btn" data-scene="fruit">水果</button>
+        <button class="scene-btn" data-scene="animal">小动物</button>
+        <button class="scene-btn" data-scene="color">颜色</button>
+        <button class="scene-btn" data-scene="number">数字</button>
+        <button class="scene-btn" data-scene="weather">天气</button>
+        <button class="scene-btn" data-scene="feeling">心情</button>
+        <button class="scene-btn" data-scene="action">日常动作</button>
+    </div>
+
+    <div class="dialog-box">
+        <div class="empty">👉 点击上方场景开始练习</div>
+    </div>
+</div>
+
+<script>
+    let isSpeaking = false;
+
+    // 点击气泡朗读
+    function speakBubble(elem) {
+        if (!window.speechSynthesis || isSpeaking) return;
+        const text = elem.getAttribute("data-text");
+        if (!text) return;
+
+        isSpeaking = true;
+        window.speechSynthesis.cancel();
+
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = "en-US";
+        u.rate = 0.8;
+
+        u.onend = function () {
+            isSpeaking = false;
+        };
+
+        window.speechSynthesis.speak(u);
+    }
+
+    // 中班 12 个场景
+    const dialogData = {
+        greeting: [
+            { role: "teacher", en: "Good morning!", cn: "早上好！" },
+            { role: "kid", en: "Good morning, teacher!", cn: "老师早上好！" },
+            { role: "teacher", en: "How are you?", cn: "你好吗？" },
+            { role: "kid", en: "I am fine, thank you.", cn: "我很好，谢谢你。" }
+        ],
+        introduce: [
+            { role: "teacher", en: "What is your name?", cn: "你叫什么名字？" },
+            { role: "kid", en: "My name is Lily.", cn: "我的名字是莉莉。" },
+            { role: "teacher", en: "How old are you?", cn: "你几岁了？" },
+            { role: "kid", en: "I am four years old.", cn: "我四岁了。" }
+        ],
+        thanks: [
+            { role: "teacher", en: "Here you are.", cn: "给你。" },
+            { role: "kid", en: "Thank you!", cn: "谢谢你！" },
+            { role: "teacher", en: "You are welcome.", cn: "不客气。" },
+            { role: "kid", en: "Thank you very much.", cn: "非常感谢你。" }
+        ],
+        apology: [
+            { role: "kid", en: "Sorry!", cn: "对不起！" },
+            { role: "teacher", en: "That's okay.", cn: "没关系。" },
+            { role: "kid", en: "I am sorry.", cn: "我很抱歉。" },
+            { role: "teacher", en: "It's all right.", cn: "没事的。" }
+        ],
+        food: [
+            { role: "teacher", en: "Do you like rice?", cn: "你喜欢米饭吗？" },
+            { role: "kid", en: "Yes, I do.", cn: "是的，我喜欢。" },
+            { role: "teacher", en: "Do you like noodles?", cn: "你喜欢面条吗？" },
+            { role: "kid", en: "No, I don't.", cn: "不，我不喜欢。" }
+        ],
+        fruit: [
+            { role: "teacher", en: "What fruit do you like?", cn: "你喜欢什么水果？" },
+            { role: "kid", en: "I like apples.", cn: "我喜欢苹果。" },
+            { role: "teacher", en: "Do you like bananas?", cn: "你喜欢香蕉吗？" },
+            { role: "kid", en: "Yes, I like bananas.", cn: "是的，我喜欢香蕉。" }
+        ],
+        animal: [
+            { role: "teacher", en: "What's this?", cn: "这是什么？" },
+            { role: "kid", en: "It's a dog.", cn: "这是一只小狗。" },
+            { role: "teacher", en: "What's that?", cn: "那是什么？" },
+            { role: "kid", en: "It's a cat.", cn: "那是一只小猫。" }
+        ],
+        color: [
+            { role: "teacher", en: "What color is it?", cn: "它是什么颜色？" },
+            { role: "kid", en: "It's red.", cn: "它是红色的。" },
+            { role: "teacher", en: "Do you like blue?", cn: "你喜欢蓝色吗？" },
+            { role: "kid", en: "Yes, I like blue.", cn: "是的，我喜欢蓝色。" }
+        ],
+        number: [
+            { role: "teacher", en: "One, two, three.", cn: "一，二，三。" },
+            { role: "kid", en: "Four, five, six.", cn: "四，五，六。" },
+            { role: "teacher", en: "How many?", cn: "多少个？" },
+            { role: "kid", en: "Five.", cn: "五个。" }
+        ],
+        weather: [
+            { role: "teacher", en: "How is the weather?", cn: "今天天气怎么样？" },
+            { role: "kid", en: "It's sunny.", cn: "是晴天。" },
+            { role: "teacher", en: "Is it rainy?", cn: "下雨了吗？" },
+            { role: "kid", en: "No, it's cloudy.", cn: "没有，是多云。" }
+        ],
+        feeling: [
+            { role: "teacher", en: "Are you happy?", cn: "你开心吗？" },
+            { role: "kid", en: "Yes, I am happy.", cn: "是的，我很开心。" },
+            { role: "teacher", en: "Are you tired?", cn: "你累了吗？" },
+            { role: "kid", en: "No, I am not.", cn: "不，我不累。" }
+        ],
+        action: [
+            { role: "teacher", en: "Stand up, please.", cn: "请起立。" },
+            { role: "kid", en: "OK.", cn: "好的。" },
+            { role: "teacher", en: "Sit down, please.", cn: "请坐下。" },
+            { role: "kid", en: "Thank you.", cn: "谢谢。" }
+        ]
+    };
+
+    const sceneBtns = document.querySelectorAll(".scene-btn");
+    const dialogBox = document.querySelector(".dialog-box");
+
+    sceneBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            sceneBtns.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            const list = dialogData[btn.dataset.scene];
+            let html = `<h3 class="dialog-title">${btn.textContent}</h3>`;
+            
+            list.forEach(item => {
+                const isTeacher = item.role === "teacher";
+                const bubbleClass = isTeacher ? "teacher-bubble" : "kid-bubble";
+                const nameText = isTeacher ? "妈妈" : "如意";
+                html += `
+                <div class="chat ${item.role}">
+                    <div class="name">${nameText}</div>
+                    <div class="bubble ${bubbleClass}" data-text="${item.en}" onclick="speakBubble(this)">
+                        ${item.en}<br><small>${item.cn}</small>
+                    </div>
+                </div>`;
+            });
+            dialogBox.innerHTML = html;
+        });
+    });
+</script>
+</body>
+</html>

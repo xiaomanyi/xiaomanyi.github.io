@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+        <script src="../js/check.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+		<title>数学练习 · 智能出题</title>
+		<style type="text/css">
+			*{
+				font-family: "微软雅黑";
+				border-collapse: collapse;
+			}
+			#title,.p_title{
+				margin-bottom:5px;
+				text-align: center;
+				font-size: 30px;
+				font-weight: 900;
+			}
+			#encourage {
+				text-align: center;
+				font-size: 18px;
+				/* color: #ff5e91; */
+                color: #333;
+				margin-bottom: 22px;
+				font-weight: bold;
+			}
+			.p_title{
+				clear: both;
+				height: 70px;
+				display: none;
+			}
+			#choose{
+				text-align: center;
+			}
+			#out{
+				width: 840px;
+				margin: 20px auto;
+				padding: 20px;
+			}
+			#content{
+				float: left;
+				border: 1px black solid;
+			}
+			.question{
+				width: 418px;
+				height: 78px;
+				float: left;
+				font-size:35px;
+				font-weight: bold;
+			}
+			.question .subject{
+				display: inline-block;
+			}
+			.question .result{
+				text-align: center;
+				font-size: 30px;
+				border: 0px;
+				border-bottom: 1px black solid;
+			}
+			.a,.b,.answer{
+				display: inline-block;
+				width: 70px;
+				text-align: center;
+			}
+			.op{
+				display: inline-block;
+				width: 22px;
+				text-align: center;
+			}
+			.answer{
+				color: green;
+				font-weight: 900;
+			}
+			.hidden{
+				display: none;
+			}
+			.show{
+				display: inline-block;
+			}
+			.seq{
+				display: none;
+				font-style: italic;
+				width: 30px;
+				color:#666;
+			}
+            /* ========== 只美化按钮和输入框 ========== */
+			input[type="text"]{
+				border:1px solid #ddd;
+				border-radius:6px;
+				padding:6px 10px;
+				font-size:15px;
+			}
+			input[type="button"]{
+				background:#0070e0;
+				color:white;
+				border:none;
+				padding:8px 16px;
+				border-radius:8px;
+				font-size:15px;
+				cursor:pointer;
+				margin:0 4px;
+			}
+			input[type="button"]:nth-child(2),
+			input[type="button"]:nth-child(4){
+				background:#f1f5f9;
+				color:#333;
+			}
+			input[type="button"]:hover{
+				opacity:0.9;
+			}
+			input[type="checkbox"]{
+				transform:scale(1.2);
+				margin-right:4px;
+			}
+			/* ======================================== */
+		</style>
+	</head>
+	<body>
+		<div id="">
+			<div id="title">数学练习题</div>
+			<div id="encourage"></div>
+			<div id="top">
+				
+				<div id="choose">
+					<form action="" method="post" onsubmit="return false;" name="ckop">
+						选择练习类型：
+						<input type="checkbox" name="op" id="jia" value="+" checked/><label for="jia">加</label>&emsp;
+						<input type="checkbox" name="op" id="jian" value="-"/><label for="jian">减</label>&emsp;
+						<input type="checkbox" name="op" id="cheng" value="*"/><label for="cheng">乘</label>&emsp;
+						<input type="checkbox" name="op" id="chu" value="/"/><label for="chu">除</label>&emsp; 
+						<br /><br />
+						出题数字范围：
+						<input type="text" value="0" size="8" id="minNum"/>&emsp;到&emsp;<input type="text" value="10" size="8" id="maxNum"/>
+						<br /><br />
+						数量：<input type="text" id="q_num" value="30" />
+						<div style="display: none;">是否显示编号：<input type="checkbox" id="s_seq" onchange="show_seq(this);" /></div>
+						<br /><br />
+						<input type="button" value="随机出题" onclick="work();"/>
+						<input type="button" value="显示答案" id="show_an" style="display:none;" onclick="show_answer(this);" />
+						<input type="button" value="判题" id="check_an" onclick="check_answer(this);" />
+						<input type="button" value="电脑打印" onclick="print_q();" />
+						<br /><br />
+						<div id="show_msg"></div>
+					</form>
+				</div>
+			</div>
+			<div id="out">
+				<div id="content"></div>
+			</div>
+		</div>
+
+	<script type="text/javascript">
+		var op = [];
+		var minNum, maxNum, a, b, total = 0;
+		var title = "";
+		var usedQuestions = new Set();
+
+		// 鼓励语列表
+		const encourages = [
+			"你认真的样子最棒啦！🌟",
+			"小小数学家，加油哦！💪",
+			"越算越聪明，你真棒！✨",
+			"认真练习，你会越来越优秀！🎓",
+			"爱思考的小朋友最厉害！🚀",
+			"相信自己，你一定可以！🥇",
+			"每天练一练，进步看得见！⭐",
+			"你是最棒的小小数学家！🎈"
+		];
+
+		// 随机鼓励语
+		function randomEncourage() {
+			let index = Math.floor(Math.random() * encourages.length);
+			document.getElementById("encourage").innerText = encourages[index];
+		}
+
+		function getOp() {
+			op = [];
+			ops = document.getElementsByName("op");
+			for (var i = 0; i < ops.length; i++) {
+				if (ops[i].checked) op.push(ops[i].value);
+			}
+			minNum = parseInt(document.getElementById("minNum").value);
+			maxNum = parseInt(document.getElementById("maxNum").value);
+			total = parseInt(document.getElementById("q_num").value);
+			if (isNaN(minNum) || isNaN(maxNum) || isNaN(total)) {
+				alert("请输入正确数字！");
+				return false;
+			}
+			title = "数学【";
+			for (var i = 0; i < op.length; i++) {
+				switch (op[i]) {
+					case '+': title += "加法、"; break;
+					case '-': title += "减法、"; break;
+					case '*': title += "乘法、"; break;
+					case '/': title += "除法、"; break;
+				}
+			}
+			title = title.substr(0, title.length - 1) + "】练习题";
+			document.getElementById("title").innerHTML = title;
+			usedQuestions.clear();
+			randomEncourage(); // 每次出题都换鼓励语
+			return true;
+		}
+
+		function work() {
+			document.getElementById("content").innerHTML = "";
+			document.getElementById("check_an").value = "判题";
+			document.getElementById("show_an").value = "显示答案";
+			document.getElementById("s_seq").checked = false;
+			if (!getOp()) return;
+
+			for (var i = 1; i <= total; i++) {
+				let attempt = 0;
+				while (true) {
+					attempt++;
+					if (attempt > 1000) break;
+					a = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+					b = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+					o = op[Math.floor(Math.random() * op.length)];
+
+					if (o == '/') {
+						if (a == 0) continue;
+						b = getChuShu(a);
+						if (b === 0) continue;
+					} else if (o == '-') {
+						b = Math.floor(Math.random() * (a - minNum + 1)) + minNum;
+					}
+
+					let key = `${a}${o}${b}`;
+					if (!usedQuestions.has(key)) {
+						usedQuestions.add(key);
+						showOneQuestion(i, a, o, b);
+						break;
+					}
+				}
+			}
+		}
+
+		function showOneQuestion(seq, a, o, b) {
+			var answer = eval(a + o + b);
+			var str = o.replace("*", "&times;").replace("/", "&divide;");
+			var txt = `<div class='question'>
+				<span class='seq'>${seq}、&emsp;&emsp;</span>
+				<span class='subject'>
+					<span class='a'>${a}</span>
+					<span class='op'>${str}</span>
+					<span class='b'>${b}</span>=&emsp;<input type='text' size='6' class='result' style="border-radius:0" />
+				</span>
+				<span class='answer hidden'>${answer}</span>
+				<span class='tip'></span>
+			</div>`;
+			content.innerHTML += txt;
+		}
+
+		function getChuShu(n) {
+			var yueshu = [];
+			for (var i = 1; i <= n; i++) {
+				if (n % i == 0) yueshu.push(i);
+			}
+			if (yueshu.length === 0) return 1;
+			return yueshu[Math.floor(Math.random() * yueshu.length)];
+		}
+
+		function show_answer(ts) {
+			let show = ts.value == "显示答案";
+			ts.value = show ? "隐藏答案" : "显示答案";
+			let ans = document.getElementsByClassName("answer");
+			for (let i = 0; i < ans.length; i++) {
+				ans[i].className = show ? "answer" : "answer hidden";
+			}
+		}
+
+		function check_answer(ts) {
+			let judge = ts.value == "判题";
+			ts.value = judge ? "取消判题" : "判题";
+			let ok = 0, ng = 0;
+			let res = document.getElementsByClassName("result");
+			let ans = document.getElementsByClassName("answer");
+			let tip = document.getElementsByClassName("tip");
+			for (let i = 0; i < res.length; i++) {
+				if (!judge) {
+					tip[i].innerHTML = "";
+				} else {
+					if (res[i].value == ans[i].innerText) {
+						tip[i].innerHTML = "<span style='color:green'>√</span>"; ok++;
+					} else {
+						tip[i].innerHTML = "<span style='color:red'>×</span>"; ng++;
+					}
+				}
+			}
+			if (judge) {
+				document.getElementById("show_msg").innerHTML = 
+					`总题数：${total} 对：${ok} 错：${ng} 正确率：${(ok/total*100).toFixed(0)}%`;
+			} else {
+				document.getElementById("show_msg").innerHTML = "";
+			}
+		}
+
+		// 打印时自动去掉边框
+		function print_q() {
+			let top = document.getElementById("top");
+			let content = document.getElementById("content");
+			
+			top.style.display = "none";
+			content.style.border = "none";  // 打印无边框
+			
+			window.print();
+			
+			top.style.display = "block";
+			content.style.border = "1px black solid"; // 打印完恢复边框
+		}
+
+		function show_seq(ts) {
+			let s = document.getElementsByClassName("seq");
+			for (let i = 0; i < s.length; i++) {
+				s[i].style.display = ts.checked ? "inline-block" : "none";
+			}
+		}
+	</script>
+	</body>
+</html>
