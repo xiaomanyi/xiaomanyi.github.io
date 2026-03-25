@@ -12,6 +12,9 @@
             box-sizing: border-box;
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
             -webkit-tap-highlight-color: transparent;
+            /* 禁止选中文字 */
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         body {
@@ -128,7 +131,8 @@
         <button class="btn" onclick="prevPoem()">上一首</button>
         <button class="btn" onclick="nextPoem()">下一首</button>
     </div>
-
+    <script>document.oncontextmenu = function(){return false;}
+    </script>
     <script>
         const poems = [
             {

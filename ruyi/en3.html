@@ -10,6 +10,9 @@
             margin:0; padding:0; box-sizing:border-box;
             font-family:"PingFang SC","Microsoft YaHei",sans-serif;
             -webkit-tap-highlight-color: transparent;
+            /* 禁止选中文字 */
+            -webkit-user-select: none;
+            user-select: none;
         }
         body {
             background:linear-gradient(135deg,#fff7fb,#f0fbff);
@@ -111,7 +114,8 @@
         <div class="empty">👉 点击场景开始练习</div>
     </div>
 </div>
-
+<script>document.oncontextmenu = function(){return false;}
+    </script>
 <script>
     let isSpeaking = false;
 

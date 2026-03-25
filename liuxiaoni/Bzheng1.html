@@ -4,13 +4,16 @@
     <meta charset="UTF-8">
     <script src="../js/check.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>安全员B证刷题系统</title>
+    <title>B证题库</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", sans-serif;
+            /* 禁止选中文字 */
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         :root {
@@ -227,7 +230,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="title">安全员B证刷题系统</h1>
+            <h1 class="title">B证考试刷题</h1>
             <!-- 题型切换按钮 -->
             <div class="type-tabs">
                 <button class="tab-btn active" data-type="choice">选择题</button>
@@ -255,7 +258,8 @@
             <button id="next" disabled>下一题</button>
         </div>
     </div>
-
+    <script>document.oncontextmenu = function(){return false;}
+    </script>
 <script>
 // ===================== 你的题目库：分 选择题 + 判断题 =====================
 // 格式完全不变！直接粘贴你的题目即可

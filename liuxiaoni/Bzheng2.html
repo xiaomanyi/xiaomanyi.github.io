@@ -9,6 +9,9 @@
     <style>
         html{
             font-size:62.5%;
+            /* 禁止选中文字 */
+            -webkit-user-select: none;
+            user-select: none;
         }
         .tips{
             display:none;
@@ -76,7 +79,7 @@ label{
 <body>
     <form action="",method="post">
     <fieldset>
-        <h2 class="text-center">B证多选题（随机20题，每题2分）</h2>
+        <h2 class="text-center">B证多选题（随机抽20题）</h2>
         <div style="text-align:left;padding:5px;">
                 <button style="margin-right:5px;display: none;" id="btn4" class="btn" type="button" >出题</button>
                 <button style="margin-right:5px; display: none;" id="btn2" class="btn" type="button" >清空</button>
@@ -7802,6 +7805,8 @@ label{
         <button id="btn3" class="btn" type="button" >多选题完成</button>
     </div>
      <!-- <button onclick="getRandomInts">随机数</button> -->
+      <script>document.oncontextmenu = function(){return false;}
+    </script>
 <script>
 // $(function(){
 //     alert('做完点击 显示答案 自己对一下哈～');
@@ -7901,7 +7906,7 @@ function coreCount(){
 
     var tip = document.getElementById('tips');
     var rightNumber2 = allNum-wrongNum;
-    tip.innerHTML = "结果分析：做对了"+ (allNum-wrongNum)+"道，得分： "+ (allNum-wrongNum)*2 +'  分！（少选的也算对了，有少选的请每题请减去1.5分！）'
+    tip.innerHTML = "结果分析：做对了"+ (allNum-wrongNum)+"道，得分： "+ (allNum-wrongNum)*2 +'  分！（这里少选的也算对了）'
     sessionStorage.setItem('duoxuan',rightNumber2);
 }
 $("#btn2").click(function(){

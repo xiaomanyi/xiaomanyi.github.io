@@ -12,6 +12,9 @@
             box-sizing: border-box;
             font-family: "Microsoft YaHei", sans-serif;
             -webkit-tap-highlight-color: transparent;
+            /* 禁止选中文字 */
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         body {
@@ -163,7 +166,8 @@
             <div class="empty">👉 点击上方场景，开始练习吧！</div>
         </div>
     </div>
-
+    <script>document.oncontextmenu = function(){return false;}
+    </script>
     <script>
         let isSpeaking = false;
 
