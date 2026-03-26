@@ -1,464 +1,437 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
     <script src="../js/check.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C证题库</title>
+    <meta charset="UTF-8">
+    <!-- 最强禁止缩放配置 👇 所有手机平板生效 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <!-- iOS Safari 专用禁止双击缩放 / 弹性滚动 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <title>在线刷题</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Microsoft YaHei", sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            font-family: "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
             user-select: none;
             -webkit-user-select: none;
-            user-select: none;
+            -webkit-appearance: none;
+            /* 禁止 iOS 长按弹出菜单 */
+            -webkit-touch-callout: none;
+        }
+
+        html, body {
+            min-height: 100%;
+            background-color: #f7f8fa;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            /* 禁止 iOS 双击缩放 */
+            touch-action: manipulation;
         }
 
         body {
-            background: #f5f5f9;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
+            padding: 20px 15px;
         }
 
-        .wrapper {
+        .container {
             width: 100%;
-            max-width: 700px;
-        }
-
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        .card {
-            background: #fff;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px 28px;
             border-radius: 16px;
-            padding: 24px;
-            box-shadow: none;
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: #f1f3f5;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
             box-shadow: none !important;
-            outline: none !important;
+            position: relative;
         }
 
         .title {
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 20px;
+            font-size: 24px;
+            color: #222;
+            margin-bottom: 50px;
+            font-weight: 600;
         }
 
-        .radio-group {
-            display: flex;
-            gap: 10px;
-            margin: 12px 0 20px;
-            flex-wrap: wrap;
-        }
-
-        .radio-item {
-            flex: 1;
-            min-width: 90px;
-        }
-
-        .radio-item input {
-            display: none;
-        }
-
-        .radio-item label {
-            display: block;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: none !important;
-            outline: none !important;
-        }
-
-        .radio-item input:checked + label {
-            background: #409eff;
-            color: #fff;
-            border-color: #409eff;
-        }
-
-        .form-item {
-            margin-bottom: 16px;
-        }
-
-        .form-label {
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        input.number {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            outline: none !important;
-            box-shadow: none !important;
-        }
-
-        /* 起始题号 淡入淡出 */
-        #startRow {
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
+        /* 返回按钮 - 右上角 */
+        #backBtn {
+            margin-top:20px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #f3f4f6;
             border: none;
-            background: #409eff;
-            color: #fff;
-            font-size: 16px;
-            margin-top: 10px;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 13px;
+            color: #374151;
+            cursor: pointer;
+            display: none;
+            box-shadow: none !important;
+        }
+        #backBtn:hover {
+            background: #e5e7eb;
+        }
+
+        .home-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            align-items: center;
+        }
+
+        /* 下拉框 - 无任何阴影 */
+        .select-box {
+            width: 100%;
+            max-width: 340px;
+            padding: 14px 18px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s;
+            background: #fff;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            box-shadow: none !important;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+        }
+        .select-box:focus {
+            border-color: #3b82f6;
+            box-shadow: none !important;
+        }
+
+        /* 输入框 - 无任何阴影 */
+        .num-input {
+            width: 100%;
+            max-width: 340px;
+            padding: 14px 18px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s;
+            text-align: center;
+            box-shadow: none !important;
+            -webkit-appearance: none;
+        }
+        .num-input:focus {
+            border-color: #3b82f6;
+            box-shadow: none !important;
+        }
+
+        /* 所有按钮 - 无阴影 */
+        button {
+            transition: all 0.2s;
+            border-radius: 12px;
+            border: none;
+            font-size: 15px;
             cursor: pointer;
             box-shadow: none !important;
-            outline: none !important;
+            -webkit-appearance: none;
         }
 
-        .btn-light {
-            background: #f1f3f5;
-            color: #333;
+        .start-btn {
+            margin-top: 8px;
+            padding: 14px 40px;
+            background: #3b82f6;
+            color: white;
+        }
+        .start-btn:hover {
+            background: #2563eb;
         }
 
-        .btn-danger {
-            background: #f56c6c;
-            color: #fff;
-        }
-
-        .progress-bar {
-            text-align: center;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        .q-header {
+        .answer-tip {
+            height: 44px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
+            margin-top: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            border: none;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .answer-tip.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        .tip-correct {
+            background: #f0fdf4;
+            color: #166534;
+        }
+        .tip-wrong {
+            background: #fef2f2;
+            color: #991b1b;
+            animation: shake 0.4s ease-in-out;
+        }
+        @keyframes shake {
+            0%,100%{transform:translateX(0);}
+            25%{transform:translateX(-4px);}
+            50%{transform:translateX(4px);}
+            75%{transform:translateX(-4px);}
+        }
+
+        .question-box {
+            display: none;
+        }
+        .question-type {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-radius: 8px;
             font-size: 14px;
+            font-weight: bold;
             margin-bottom: 12px;
         }
-
-        .q-tag {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 13px;
-            color: #fff;
+        .progress {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f3f4f6;
         }
-
-        .tag-single { background: #409eff; }
-        .tag-multiple { background: #ff7d40; }
-        .tag-judge { background: #36c36a; }
-
-        .q-index {
-            color: #409eff;
-            font-weight: bold;
-        }
-
-        .question {
-            font-size: 16px;
+        .question-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 24px;
             line-height: 1.6;
-            margin-bottom: 16px;
         }
-
         .options {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 16px;
+            gap: 12px;
+            margin-bottom: 10px;
         }
-
         .option {
-            padding: 12px;
-            border: 1px solid #ddd;
+            padding: 14px;
+            border: 1px solid #e5e7eb;
             border-radius: 10px;
             cursor: pointer;
+            transition: 0.2s;
+            font-size: 15px;
             box-shadow: none !important;
-            outline: none !important;
         }
-
+        .option:hover {
+            border-color: #3b82f6;
+            background: #f9fafb;
+        }
         .option.selected {
-            border-color: #409eff;
-            background: #e6f7ff;
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+        .option.correct {
+            background: #f0fdf4 !important;
+            border-color: #16a34a !important;
+            color: #166534 !important;
+        }
+        .option.wrong {
+            background: #fef2f2 !important;
+            border-color: #ef4444 !important;
+            color: #991b1b !important;
         }
 
-        .option.disabled {
-            pointer-events: none;
-            opacity: 0.7;
-        }
-
-        .tip {
-            text-align: center;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            font-weight: bold;
-            white-space: pre-line;
-        }
-
-        .tip-right {
-            background: #e6fffa;
-            color: #00b42a;
-        }
-
-        .tip-wrong {
-            background: #fef0f0;
-            color: #f56c6c;
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 10px;
-        }
-
-        .tool-toggle {
-            text-align: center;
-            margin-top: 15px;
-            color: #666;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .tool-box {
-            display: none;
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .tool-box button {
-            margin: 4px;
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            background: #f1f3f5;
+        #multiBtn {
+            margin-top: 12px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 15px;
+            width: 100%;
             box-shadow: none !important;
-            outline: none !important;
         }
-
-        /* 错题 TAB 切换 */
-        .wrong-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
+        #multiBtn:disabled {
+            background: #d1d5db;
+            color: #fff;
+            cursor: not-allowed;
         }
-        .tab-btn {
-            flex: 1;
-            padding: 8px 0;
-            border-radius: 8px;
-            border: none;
-            background: #f1f3f5;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        .tab-btn.active {
-            background: #409eff;
+        #multiBtn:not(:disabled) {
+            background: #3b82f6;
             color: #fff;
         }
 
-        /* 分页 */
-        .pagination {
+        .btn-wrap {
+            margin-top: 32px;
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin: 16px 0;
+            gap: 12px;
         }
-        .page-btn {
-            padding: 6px 12px;
-            border-radius: 6px;
-            background: #f1f3f5;
-            border: none;
-            cursor: pointer;
+        .next-btn, .analyze-btn {
+            padding: 12px 32px;
+            color: white;
+            box-shadow: none !important;
         }
-        .page-btn:disabled {
-            opacity: 0.5;
+        .next-btn {
+            background: #16a34a;
+        }
+        .next-btn:disabled {
+            background: #d1d5db;
             cursor: not-allowed;
         }
+        .analyze-btn {
+            background: #f59e0b;
+        }
 
-        .wrong-item {
-            background: #f9f9f9;
+        /* 弹窗 */
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 32px 24px;
+            border-radius: 16px;
+            width: 92%;
+            max-width: 520px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: none !important;
+        }
+        .modal-title {
+            font-size: 20px;
+            margin-bottom: 24px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .stats-item {
+            background: #f9fafb;
             padding: 14px;
             border-radius: 10px;
-            margin-bottom: 12px;
+            text-align: center;
+            font-size: 14px;
+            box-shadow: none !important;
         }
-        .wrong-head {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
+        .stats-item strong {
+            font-size: 18px;
+            color: #3b82f6;
         }
-        .wrong-index {
-            font-weight: bold;
-            color: #409eff;
+        .wrong-item {
+            border: 1px solid #f3f4f6;
+            padding: 18px;
+            margin: 14px 0;
+            border-radius: 12px;
+            box-shadow: none !important;
         }
         .wrong-question {
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        .wrong-options {
-            margin: 8px 0;
-            line-height: 1.6;
-        }
-
-        .record-item {
-            background: #f9f9f9;
-            padding: 14px;
-            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
             margin-bottom: 12px;
         }
-
-        @keyframes shake {
-            0%,100%{transform:translateX(0);}
-            25%{transform:translateX(-5px);}
-            75%{transform:translateX(-5px);}
+        .wrong-option {
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 8px;
+            font-size: 14px;
         }
-
-        .shake {
-            animation: shake 0.4s;
+        .wrong-answer {
+            margin-top: 10px;
+            font-size: 15px;
+        }
+        .text-red {
+            color: #ef4444;
+            font-weight: bold;
+        }
+        .text-green {
+            color: #16a34a;
+            font-weight: bold;
+        }
+        .modal-btns {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 20px;
+        }
+        .modal-btns button {
+            padding: 10px 24px;
+            color: #fff;
+            font-size: 15px;
+            box-shadow: none !important;
+        }
+        .modal-btns button:first-child {
+            background: #3b82f6;
+        }
+        .close-btn {
+            background: #6b7280 !important;
         }
     </style>
 </head>
-<body>
 
-<div class="wrapper">
-    <div id="homePage" class="page active">
-        <div class="card">
-            <h1 class="title">安全员C证刷题版</h1>
-            <div class="form-item">
-                <label class="form-label">题目类型</label>
-                <div class="radio-group">
-                    <div class="radio-item">
-                        <input type="radio" name="type" id="t1" value="single" checked>
-                        <label for="t1">单选题</label>
-                    </div>
-                    <div class="radio-item">
-                        <input type="radio" name="type" id="t2" value="multiple">
-                        <label for="t2">多选题</label>
-                    </div>
-                    <div class="radio-item">
-                        <input type="radio" name="type" id="t3" value="judge">
-                        <label for="t3">判断题</label>
-                    </div>
-                </div>
-            </div>
-            <div class="form-item">
-                <label class="form-label">刷题模式</label>
-                <div class="radio-group">
-                    <div class="radio-item">
-                        <input type="radio" name="mode" id="m1" value="order" checked onchange="toggleStartInput()">
-                        <label for="m1">顺序刷题</label>
-                    </div>
-                    <div class="radio-item">
-                        <input type="radio" name="mode" id="m2" value="random" onchange="toggleStartInput()">
-                        <label for="m2">随机刷题</label>
-                    </div>
-                </div>
-            </div>
+<body oncontextmenu="return false">
 
-            <!-- 顺序刷题起始题号 -->
-            <div class="form-item" id="startRow">
-                <label class="form-label">顺序刷题从第几题开始（默认1）</label>
-                <input type="number" class="number" value="1" min="1" id="startQuestionNo">
-            </div>
+<div class="container">
+    <button id="backBtn" onclick="goBack()">← 返回</button>
+    <h1 class="title" id="mainTitle">C证继续教育刷题</h1>
 
-            <div class="form-item">
-                <label class="form-label">题目数量（0=全部）</label>
-                <input type="number" class="number" value="0" min="0" id="countInput">
-            </div>
-            <button class="btn" onclick="startPractice()">开始刷题</button>
+    <div class="home-wrap" id="homeBox">
+        <select class="select-box" id="qType">
+            <option value="single">单选题</option>
+            <option value="multiple">多选题</option>
+            <option value="judge">判断题</option>
+            <option value="all">全部题型</option>
+        </select>
 
-            <div class="tool-toggle" onclick="toggleTools()">▼ 展开学习工具</div>
-            <div class="tool-box" id="toolBox">
-                <button onclick="showWrongBook()">错题本</button>
-                <button onclick="redoWrong()">错题重做</button>
-                <button onclick="clearWrong()">清空错题</button>
-                <button onclick="showPracticeRecord()">刷题记录</button>
-                <button onclick="clearPracticeRecord()">清空记录</button>
-            </div>
-        </div>
+        <input type="number" class="num-input" id="numInput" placeholder="输入题目数量，不填默认全部" min="0">
+        
+        <button class="start-btn" onclick="startPractice()">开始刷题</button>
     </div>
 
-    <div id="practicePage" class="page">
-        <div class="card">
-            <button class="back-btn" onclick="backHome()">← 返回</button>
-            <div class="progress-bar" id="progressBar">已刷 0/总题 0</div>
-            <div class="q-header">
-                <span id="qTag" class="q-tag"></span>
-                <span id="qId" class="q-index">序号：1</span>
-            </div>
-            <div class="question" id="question"></div>
-            <div class="options" id="options"></div>
-            <button class="btn" id="submitBtn" style="display:none;">提交多选</button>
-            <div class="tip" id="tip"></div>
-            <div class="btn-row">
-                <button class="btn btn-light" onclick="prev()">上一题</button>
-                <button class="btn" onclick="next()">下一题</button>
-            </div>
+    <div class="question-box" id="questionBox">
+        <div class="question-type" id="questionType"></div>
+        <div class="progress" id="progress"></div>
+        <div class="question-title" id="questionTitle"></div>
+        <div class="options" id="optionsBox"></div>
+        <div class="answer-tip" id="answerTip"></div>
+
+        <div class="btn-wrap">
+            <button class="next-btn" id="nextBtn" disabled>下一题</button>
+            <button class="analyze-btn" id="analyzeBtn" onclick="showAnalyze()">做题分析</button>
         </div>
     </div>
+</div>
 
-    <div id="wrongPage" class="page">
-        <div class="card">
-            <h1 class="title">错题本</h1>
-            <div class="wrong-tabs">
-                <button class="tab-btn active" data-type="all">全部</button>
-                <button class="tab-btn" data-type="single">单选</button>
-                <button class="tab-btn" data-type="multiple">多选</button>
-                <button class="tab-btn" data-type="judge">判断</button>
-            </div>
-            <div id="wrongList"></div>
-            <div class="pagination">
-                <button class="page-btn" id="prevPage">上一页</button>
-                <span id="pageInfo">第 1 页</span>
-                <button class="page-btn" id="nextPage">下一页</button>
-            </div>
-            <button class="btn" onclick="backHome()">返回</button>
+<div class="modal" id="analyzeModal">
+    <div class="modal-content">
+        <h3 class="modal-title">答题分析报告</h3>
+        <div class="stats-grid" id="analyzeContent"></div>
+        <div class="modal-btns">
+            <button onclick="showWrongAndCloseAnalyze()">查看错题</button>
+            <button class="close-btn" onclick="closeAllAndReset()">关闭</button>
         </div>
     </div>
+</div>
 
-    <div id="practiceRecordPage" class="page">
-        <div class="card">
-            <h1 class="title">刷题记录</h1>
-            <div id="practiceRecordList"></div>
-            <div class="pagination">
-                <button class="page-btn" id="recordPrev">上一页</button>
-                <span id="recordPageInfo">第1页</span>
-                <button class="page-btn" id="recordNext">下一页</button>
-            </div>
-            <button class="btn" onclick="backHome()">返回</button>
+<div class="modal" id="wrongModal">
+    <div class="modal-content">
+        <h3 class="modal-title">本次错题回顾</h3>
+        <div id="wrongContent"></div>
+        <div class="modal-btns">
+            <button class="close-btn" onclick="closeAllAndReset()">关闭</button>
         </div>
     </div>
 </div>
 
 <script>
-document.oncontextmenu = function(){return false;}
-
 const questionBank = {
     single: [
     { type: 'single',id: 1, question: "社会主义中国的安全生产管理,离不开中国共产党的领导和()的引导｡", options: [
@@ -8847,407 +8820,195 @@ const questionBank = {
 
 
 
-let currentList = [], currentIndex = 0;
-let userAnswer = '';
-let userAnswerHistory = {};
+let currentQuestions = [];
+let currentIndex = 0;
+let userAnswers = [];
+let wrongQuestions = [];
+let totalQuestions = 0;
+let selectedKeys = [];
 let answered = false;
 
-let wrongList = JSON.parse(localStorage.getItem('wrongList')) || [];
-let practiceRecord = JSON.parse(localStorage.getItem('practiceRecord')) || [];
-if (!Array.isArray(practiceRecord)) practiceRecord = [];
-
-let sessionTotal = 0;
-let sessionCorrect = 0;
-let currentType = '';
-let totalPlanned = 0;
-
-// 错题分页
-let wrongCurrentPage = 1;
-const wrongPageSize = 10;
-let wrongFilterType = 'all';
-
-// 刷题记录分页 5条/页
-let recordCurrentPage = 1;
-const recordPageSize = 5;
-
-// ===================== 自动清理保护机制 =====================
-function autoClearData() {
-    if (wrongList.length > 100) {
-        wrongList = [];
-        alert("错题已超过100条，为保证系统流畅，已自动清空所有错题！");
-    }
-    if (practiceRecord.length > 30) {
-        practiceRecord = [];
-        alert("刷题记录已超过30条，为保证系统流畅，已自动清空所有记录！");
-    }
-    saveWrong();
-    savePracticeRecord();
+function goBack() {
+    document.getElementById('backBtn').style.display = 'none';
+    document.getElementById('questionBox').style.display = 'none';
+    document.getElementById('homeBox').style.display = 'flex';
+    document.getElementById('mainTitle').style.display = 'block';
 }
 
-// ===================== 错题去重存储 =====================
-function addWrongQuestion(question) {
-    const exists = wrongList.some(item => item.id === question.id);
-    if (!exists) {
-        wrongList.push(question);
-        autoClearData();
-        saveWrong();
-    }
+function getTotalByType(type){
+    if(type === 'all') return questionBank.single.length + questionBank.multiple.length + questionBank.judge.length;
+    return questionBank[type].length;
 }
 
-function saveWrong() {
-    localStorage.setItem('wrongList', JSON.stringify(wrongList));
-}
-function savePracticeRecord() {
-    localStorage.setItem('practiceRecord', JSON.stringify(practiceRecord));
-}
-
-// ===================== 基础功能 =====================
-function showPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-}
-function backHome() {
-    showPage('homePage');
-}
-function toggleTools() {
-    const box = document.getElementById('toolBox');
-    box.style.display = box.style.display === 'block' ? 'none' : 'block';
-}
-
-// ===================== 顺序/随机切换 显示/隐藏 起始题号 =====================
-function toggleStartInput() {
-    const mode = document.querySelector('input[name="mode"]:checked').value;
-    const row = document.getElementById('startRow');
-    const input = document.getElementById('startQuestionNo');
-    
-    if (mode === 'order') {
-        row.style.height = 'auto';
-        row.style.opacity = '1';
-        input.disabled = false;
-    } else {
-        row.style.height = '0';
-        row.style.opacity = '0';
-        row.style.margin = '0';
-        row.style.padding = '0';
-        input.disabled = true;
-    }
-}
-
-// ===================== 开始刷题 =====================
 function startPractice() {
-    const type = document.querySelector('input[name="type"]:checked').value;
-    const mode = document.querySelector('input[name="mode"]:checked').value;
-    let cnt = +document.getElementById('countInput').value || 0;
-    let startNo = +document.getElementById('startQuestionNo').value || 1;
+    document.getElementById('mainTitle').style.display = 'none';
+    document.getElementById('backBtn').style.display = 'block';
+    const type = document.getElementById('qType').value;
+    let num = parseInt(document.getElementById('numInput').value) || 0;
+    const total = getTotalByType(type);
 
-    let src = questionBank[type] || [];
-    let totalSrc = src.length;
-    let list = [];
+    if(num > total) num = 0;
 
-    if (mode === 'order') {
-        let startIdx = startNo - 1;
-        if (startIdx < 0) startIdx = 0;
-        if (startIdx >= totalSrc) {
-            alert('起始题号超出范围！');
-            return;
-        }
-        list = src.slice(startIdx);
-    } else {
-        list = [...src];
-        list.sort(() => Math.random() - 0.5);
-    }
+    let bank = [];
+    if (type === 'all') bank = [...questionBank.single, ...questionBank.multiple, ...questionBank.judge];
+    else bank = [...questionBank[type]];
 
-    cnt = cnt <= 0 ? list.length : Math.min(cnt, list.length);
-    currentList = list.slice(0, cnt);
-    totalPlanned = currentList.length;
+    bank = bank.sort(() => Math.random() - 0.5);
+    totalQuestions = num > 0 ? Math.min(num, bank.length) : bank.length;
+    currentQuestions = bank.slice(0, totalQuestions);
 
-    currentType = { single: '单选题', multiple: '多选题', judge: '判断题' }[type];
     currentIndex = 0;
-    userAnswerHistory = {};
-    sessionTotal = 0;
-    sessionCorrect = 0;
+    userAnswers = [];
+    wrongQuestions = [];
+    answered = false;
 
-    render();
-    showPage('practicePage');
+    document.getElementById('homeBox').style.display = 'none';
+    document.getElementById('questionBox').style.display = 'block';
+    renderQuestion();
 }
 
-// ===================== 渲染题目 =====================
-function render() {
-    if (currentIndex >= currentList.length) {
-        const now = new Date();
-        const timeStr = now.getFullYear() + '-' +
-            String(now.getMonth()+1).padStart(2,'0') + '-' +
-            String(now.getDate()).padStart(2,'0') + ' ' +
-            String(now.getHours()).padStart(2,'0') + ':' +
-            String(now.getMinutes()).padStart(2,'0');
-
-        const rate = totalPlanned > 0 ? ((sessionCorrect / totalPlanned) * 100).toFixed(1) : 0;
-        practiceRecord.unshift({ time: timeStr, type: currentType, total: totalPlanned, correct: sessionCorrect, rate: rate + '%' });
-        
-        autoClearData();
-        savePracticeRecord();
-
-        alert(`✅ 本轮刷题完成！\n总题数：${totalPlanned}\n正确：${sessionCorrect}\n正确率：${rate}%`);
-        backHome();
-        return;
-    }
-
-    const q = currentList[currentIndex];
+function renderQuestion() {
+    const q = currentQuestions[currentIndex];
     answered = false;
-    document.getElementById('progressBar').innerText = `已刷 ${currentIndex}/${totalPlanned} 题`;
+    selectedKeys = [];
+    document.getElementById('nextBtn').disabled = true;
+    document.getElementById('nextBtn').style.display = 'inline-block';
+    document.getElementById('analyzeBtn').style.display = 'none';
+    document.getElementById('answerTip').classList.remove('show');
 
-    const tagEl = document.getElementById('qTag');
-    let tagText = '', tagClass = '';
-    if (q.type === 'single') { tagText = '单选题'; tagClass = 'tag-single'; }
-    if (q.type === 'multiple') { tagText = '多选题'; tagClass = 'tag-multiple'; }
-    if (q.type === 'judge') { tagText = '判断题'; tagClass = 'tag-judge'; }
+    const typeMap = {single:'单选题',multiple:'多选题',judge:'判断题'};
+    document.getElementById('questionType').innerText = typeMap[q.type];
+    document.getElementById('progress').innerText = `第 ${currentIndex + 1} 题 / 共 ${totalQuestions} 题`;
+    document.getElementById('questionTitle').innerText = `【ID:${q.id}】 ${q.question}`;
 
-    tagEl.className = 'q-tag ' + tagClass;
-    tagEl.innerText = tagText;
-    document.getElementById('qId').innerText = '序号：' + q.id;
-    document.getElementById('question').innerText = q.question;
-    document.getElementById('tip').style.display = 'none';
+    const box = document.getElementById('optionsBox');
+    box.innerHTML = '';
 
-    const optBox = document.getElementById('options');
-    optBox.innerHTML = '';
-    q.options.forEach((txt, i) => {
-        const k = String.fromCharCode(65 + i);
+    const keys = ['A', 'B', 'C', 'D', 'E', 'F'];
+    q.options.forEach((opt, i) => {
         const div = document.createElement('div');
         div.className = 'option';
-        div.dataset.key = k;
-        div.innerText = `${k}. ${txt}`;
-        div.onclick = () => { if (!answered) select(k); };
-        optBox.appendChild(div);
+        div.innerText = `${keys[i]}. ${opt}`;
+        div.dataset.key = keys[i];
+        div.onclick = () => handleOptionClick(div);
+        box.appendChild(div);
     });
 
-    document.getElementById('submitBtn').style.display = q.type === 'multiple' ? 'block' : 'none';
-    userAnswer = userAnswerHistory[currentIndex] || '';
-    document.querySelectorAll('.option').forEach(o => {
-        if (userAnswer.includes(o.dataset.key)) o.classList.add('selected');
-    });
+    if (q.type === 'multiple') {
+        const btn = document.createElement('button');
+        btn.id = 'multiBtn';
+        btn.innerText = '提交多选答案';
+        btn.disabled = true;
+        btn.onclick = () => checkAnswer(selectedKeys.sort().join(''));
+        box.appendChild(btn);
+    }
 }
 
-// ===================== 答题 =====================
-function select(k) {
-    const q = currentList[currentIndex];
+function handleOptionClick(el) {
+    const q = currentQuestions[currentIndex];
     if (answered) return;
 
-    if (q.type !== 'multiple') {
-        userAnswer = k;
-        document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
-        document.querySelector(`[data-key="${k}"]`).classList.add('selected');
-        userAnswerHistory[currentIndex] = userAnswer;
-        check();
-        return;
+    if (q.type === 'multiple') {
+        el.classList.toggle('selected');
+        selectedKeys = [];
+        document.querySelectorAll('.option.selected').forEach(item => {
+            selectedKeys.push(item.dataset.key);
+        });
+        document.getElementById('multiBtn').disabled = selectedKeys.length === 0;
+    } else {
+        checkAnswer(el.dataset.key);
     }
-
-    let arr = userAnswer.split('');
-    if (arr.includes(k)) arr = arr.filter(x => x !== k);
-    else arr.push(k);
-    arr.sort();
-    userAnswer = arr.join('');
-
-    document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
-    arr.forEach(x => document.querySelector(`[data-key="${x}"]`).classList.add('selected'));
-    userAnswerHistory[currentIndex] = userAnswer;
 }
 
-document.getElementById('submitBtn').onclick = () => {
-    if (!answered && userAnswer) check();
-};
-
-function check() {
+function checkAnswer(userKey) {
+    const q = currentQuestions[currentIndex];
+    const options = document.querySelectorAll('.option');
+    const tip = document.getElementById('answerTip');
+    const isCorrect = userKey === q.answer;
     answered = true;
-    document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
-    const q = currentList[currentIndex];
-    const isRight = userAnswer.toUpperCase() === q.answer.toUpperCase();
 
-    sessionTotal++;
-    if (isRight) sessionCorrect++;
+    options.forEach(o => {
+        const k = o.dataset.key;
+        if (q.answer.includes(k)) o.classList.add('correct');
+        if (userKey.includes(k) && !q.answer.includes(k)) o.classList.add('wrong');
+    });
 
-    if (isRight) {
-        tip.className = 'tip tip-right';
+    tip.classList.add('show');
+    if (isCorrect) {
+        tip.className = 'answer-tip tip-correct show';
         tip.innerText = '✅ 回答正确！';
     } else {
-        tip.className = 'tip tip-wrong shake';
-        tip.innerText = `❌ 正确答案：${q.answer}`;
-        addWrongQuestion({ ...q, userAns: userAnswer });
+        tip.className = 'answer-tip tip-wrong show';
+        tip.innerText = '❌ 回答错误，正确答案：' + q.answer;
     }
-    tip.style.display = 'block';
+
+    userAnswers[currentIndex] = { user: userKey, correct: isCorrect };
+    if (!isCorrect) wrongQuestions.push({ ...q, userAnswer: userKey });
+
+    document.getElementById('nextBtn').disabled = false;
+
+    if (currentIndex + 1 >= totalQuestions) {
+        document.getElementById('nextBtn').style.display = 'none';
+        document.getElementById('analyzeBtn').style.display = 'inline-block';
+    }
 }
 
-function prev() { if (currentIndex > 0) { currentIndex--; render(); } }
-function next() { currentIndex++; render(); }
-
-// ===================== 错题本 TAB 显示数量 =====================
-function renderWrongTabCount() {
-    const allCnt = wrongList.length;
-    const sCnt = wrongList.filter(q=>q.type==='single').length;
-    const mCnt = wrongList.filter(q=>q.type==='multiple').length;
-    const jCnt = wrongList.filter(q=>q.type==='judge').length;
-
-    document.querySelector('.tab-btn[data-type="all"]').innerText = `全部(${allCnt})`;
-    document.querySelector('.tab-btn[data-type="single"]').innerText = `单选(${sCnt})`;
-    document.querySelector('.tab-btn[data-type="multiple"]').innerText = `多选(${mCnt})`;
-    document.querySelector('.tab-btn[data-type="judge"]').innerText = `判断(${jCnt})`;
-}
-
-function initWrongTabs() {
-    const btns = document.querySelectorAll('.tab-btn');
-    btns.forEach(btn => {
-        btn.onclick = () => {
-            btns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            wrongFilterType = btn.dataset.type;
-            wrongCurrentPage = 1;
-            renderWrongPage();
-        };
-    });
-}
-
-function renderWrongPage() {
-    const box = document.getElementById('wrongList');
-    let list = [...wrongList];
-    if (wrongFilterType !== 'all') list = list.filter(q => q.type === wrongFilterType);
-
-    const total = list.length;
-    const totalPage = Math.ceil(total / wrongPageSize);
-    const start = (wrongCurrentPage - 1) * wrongPageSize;
-    const end = start + wrongPageSize;
-    const pageData = list.slice(start, end);
-
-    document.getElementById('pageInfo').innerText = `第 ${wrongCurrentPage}/${totalPage || 1} 页`;
-    document.getElementById('prevPage').disabled = wrongCurrentPage <= 1;
-    document.getElementById('nextPage').disabled = wrongCurrentPage >= totalPage;
-
-    if (total === 0) { box.innerHTML = '<div style="text-align:center">暂无错题</div>'; return; }
-
-    box.innerHTML = pageData.map(q => {
-        let tagClass = '', tagText = '';
-        if (q.type === 'single') { tagText = '单选题'; tagClass = 'tag-single'; }
-        if (q.type === 'multiple') { tagText = '多选题'; tagClass = 'tag-multiple'; }
-        if (q.type === 'judge') { tagText = '判断题'; tagClass = 'tag-judge'; }
-        return `
-        <div class="wrong-item">
-            <div class="wrong-head">
-                <span class="wrong-index">序号：${q.id}</span>
-                <span class="q-tag ${tagClass}">${tagText}</span>
-            </div>
-            <div class="wrong-question">${q.question}</div>
-            <div class="wrong-options">${q.options.map((o,i)=>`${String.fromCharCode(65+i)}. ${o}`).join('<br>')}</div>
-            <div>你的答案：${q.userAns || '未答'}</div>
-            <div>正确答案：${q.answer}</div>
-        </div>`;
-    }).join('');
-}
-
-function showWrongBook() {
-    wrongCurrentPage = 1;
-    wrongFilterType = 'all';
-    document.querySelectorAll('.tab-btn').forEach((b,i)=>{i===0?b.classList.add('active'):b.classList.remove('active');});
-    renderWrongTabCount();
-    initWrongTabs();
-    renderWrongPage();
-    showPage('wrongPage');
-}
-
-document.getElementById('prevPage').onclick = () => {
-    if (wrongCurrentPage > 1) { wrongCurrentPage--; renderWrongPage(); }
-};
-document.getElementById('nextPage').onclick = () => {
-    const total = wrongFilterType==='all' ? wrongList.length : wrongList.filter(q=>q.type===wrongFilterType).length;
-    if (wrongCurrentPage < Math.ceil(total/wrongPageSize)) { wrongCurrentPage++; renderWrongPage(); }
+document.getElementById('nextBtn').onclick = () => {
+    if(!answered) return;
+    currentIndex++;
+    renderQuestion();
 };
 
-// ===================== 错题重做 / 清空 =====================
-function redoWrong() {
-    if (wrongList.length === 0) { alert('暂无错题'); return; }
-    currentList = [...wrongList];
-    totalPlanned = currentList.length;
-    currentIndex = 0;
-    userAnswerHistory = {};
-    sessionTotal = 0;
-    sessionCorrect = 0;
-    currentType = '错题重做';
-    render();
-    showPage('practicePage');
+function showAnalyze() {
+    const correct = userAnswers.filter(i => i.correct).length;
+    const wrong = wrongQuestions.length;
+    const rate = ((correct / totalQuestions) * 100).toFixed(1);
+
+    document.getElementById('analyzeContent').innerHTML = `
+        <div class="stats-item">总题数<br><strong>${totalQuestions}</strong></div>
+        <div class="stats-item">正确<br><strong>${correct}</strong></div>
+        <div class="stats-item">错误<br><strong>${wrong}</strong></div>
+        <div class="stats-item">正确率<br><strong>${rate}%</strong></div>
+    `;
+    document.getElementById('analyzeModal').style.display = 'flex';
 }
 
-function clearWrong() {
-    if(confirm('确定清空所有错题？')){
-        wrongList = [];
-        saveWrong();
-        alert('已清空所有错题');
-        renderWrongTabCount();
-        renderWrongPage();
-    }
+function showWrongAndCloseAnalyze() {
+    document.getElementById('analyzeModal').style.display = 'none';
+    showWrongQuestions();
 }
 
-// ===================== 刷题记录 5条分页 =====================
-function renderPracticeRecord() {
-    const box = document.getElementById('practiceRecordList');
-    const list = [...practiceRecord];
-    const total = list.length;
-    const totalPage = Math.ceil(total / recordPageSize);
-
-    const start = (recordCurrentPage - 1) * recordPageSize;
-    const end = start + recordPageSize;
-    const pageData = list.slice(start, end);
-
-    document.getElementById('recordPageInfo').innerText = `第 ${recordCurrentPage}/${totalPage||1} 页`;
-    document.getElementById('recordPrev').disabled = recordCurrentPage <= 1;
-    document.getElementById('recordNext').disabled = recordCurrentPage >= totalPage;
-
-    if (total === 0) {
-        box.innerHTML = '<div style="text-align:center">暂无刷题记录</div>';
-        return;
+function showWrongQuestions() {
+    const keys = ['A', 'B', 'C', 'D', 'E'];
+    const box = document.getElementById('wrongContent');
+    if (wrongQuestions.length === 0) {
+        box.innerHTML = '<p style="text-align:center;padding:20px;">🎉 全部正确！</p>';
+    } else {
+        let html = '';
+        wrongQuestions.forEach((item, i) => {
+            html += `<div class="wrong-item">`;
+            html += `<div class="wrong-question">${i + 1}.【ID:${item.id}】 ${item.question}</div>`;
+            item.options.forEach((opt, idx) => {
+                const k = keys[idx];
+                const isUser = item.userAnswer.includes(k);
+                const isRight = item.answer.includes(k);
+                let cls = isRight ? 'correct' : isUser ? 'wrong' : '';
+                html += `<div class="wrong-option option ${cls}">${k}. ${opt}</div>`;
+            });
+            html += `<div class="wrong-answer">你的答案：<span class="text-red">${item.userAnswer}</span></div>`;
+            html += `<div class="wrong-answer">正确答案：<span class="text-green">${item.answer}</span></div>`;
+            html += `</div>`;
+        });
+        box.innerHTML = html;
     }
-
-    box.innerHTML = pageData.map(r => `
-        <div class="record-item">
-            <div>时间：${r.time}</div>
-            <div>题型：${r.type}</div>
-            <div>总题：${r.total} 题</div>
-            <div>正确：${r.correct} 题</div>
-            <div>正确率：${r.rate}</div>
-        </div>
-    `).join('');
+    document.getElementById('wrongModal').style.display = 'flex';
 }
 
-function showPracticeRecord() {
-    recordCurrentPage = 1;
-    renderPracticeRecord();
-    showPage('practiceRecordPage');
+function closeAllAndReset() {
+    document.getElementById('analyzeModal').style.display = 'none';
+    document.getElementById('wrongModal').style.display = 'none';
+    goBack();
 }
-
-document.getElementById('recordPrev').onclick = () => {
-    if (recordCurrentPage > 1) {
-        recordCurrentPage--;
-        renderPracticeRecord();
-    }
-};
-document.getElementById('recordNext').onclick = () => {
-    const total = practiceRecord.length;
-    const totalPage = Math.ceil(total / recordPageSize);
-    if (recordCurrentPage < totalPage) {
-        recordCurrentPage++;
-        renderPracticeRecord();
-    }
-};
-
-function clearPracticeRecord() {
-    if(confirm('确定清空所有刷题记录？')){
-        practiceRecord = [];
-        savePracticeRecord();
-        alert('已清空所有刷题记录');
-        renderPracticeRecord();
-    }
-}
-
-// 初始化显示起始题号
-window.onload = function() {
-    toggleStartInput();
-};
 </script>
 </body>
 </html>

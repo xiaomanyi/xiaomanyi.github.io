@@ -3,30 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <script src="../js/check.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C证继续教育 - 模拟考试</title>
-    <script>
-        document.addEventListener('contextmenu', function(event) {
-            event.preventDefault();
-        });
-    </script>
+    <!-- 最强禁止缩放配置 👇 所有手机平板生效 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <!-- iOS Safari 专用禁止双击缩放 / 弹性滚动 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>继续教育C证 - 模拟考试</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: "Microsoft YaHei", sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
         }
         body {
             background: #f5f7fa;
-            padding: 20px;
+            padding: 15px;
         }
         .container {
             max-width: 1000px;
             margin: 0 auto;
             background: white;
             border-radius: 12px;
-            padding: 30px;
+            padding: 20px;
             box-shadow: 0 2px 15px rgba(0,0,0,0.1);
         }
         .header {
@@ -36,43 +37,63 @@
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         .title {
-            font-size: 22px;
+            font-size: 20px;
             color: #2d3748;
+            font-weight: bold;
         }
         .timer {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #e53e3e;
             background: #fef2f2;
             padding: 6px 12px;
             border-radius: 6px;
+            white-space: nowrap;
         }
         .score-info {
             display: flex;
-            gap: 20px;
+            gap: 12px;
             margin-bottom: 20px;
-            font-size: 14px;
+            font-size: 13px;
             color: #4a5568;
+            flex-wrap: wrap;
         }
         .nav {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 20px;
             flex-wrap: wrap;
+            max-height: 120px;
+            overflow-y: auto;
+            padding: 5px;
+            border: 1px solid #eee;
+            border-radius: 8px;
         }
         .nav-btn {
-            padding: 6px 12px;
+            padding: 6px 10px;
+            min-width: 36px;
             border: 1px solid #ddd;
             background: white;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover {
+            border-color: #4299e1;
         }
         .nav-btn.active {
             background: #4299e1;
             color: white;
             border-color: #4299e1;
+        }
+        .nav-btn.answered {
+            background: #e6f7ff;
+            border-color: #91d5ff;
         }
         .nav-btn.wrong {
             background: #fecdd3;
@@ -86,18 +107,21 @@
         }
         .question-box {
             margin-bottom: 25px;
+            min-height: 200px;
         }
         .q-title {
             font-size: 16px;
-            margin-bottom: 12px;
-            line-height: 1.6;
+            margin-bottom: 15px;
+            line-height: 1.7;
             color: #2d3748;
+            font-weight: 500;
         }
         .q-ans {
-            margin: 10px 0;
-            padding: 8px 12px;
+            margin: 12px 0;
+            padding: 10px 12px;
             border-radius: 6px;
             font-size: 14px;
+            font-weight: 500;
         }
         .q-ans.wrong {
             background: #fff1f2;
@@ -106,7 +130,7 @@
         }
         .q-ans.right {
             background: #f0fdf4;
-            color: #166534;
+            color: #16a34a;
             border: 1px solid #bbf7d0;
         }
         .options {
@@ -115,20 +139,25 @@
             gap: 10px;
         }
         .option {
-            padding: 10px 12px;
+            padding: 12px;
             border: 1px solid #eee;
             border-radius: 6px;
             cursor: pointer;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
+            line-height: 1.6;
+            transition: all 0.2s;
         }
         .option input {
             margin-right: 10px;
             width: 16px;
             height: 16px;
+            margin-top: 3px;
+            flex-shrink: 0;
         }
         .option:hover {
             background: #f8f9fa;
+            border-color: #ccc;
         }
         .option.right-ans {
             background: #dcfce7 !important;
@@ -140,16 +169,23 @@
         }
         .btn-group {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             margin-top: 30px;
             flex-wrap: wrap;
+            justify-content: center;
         }
         .btn {
-            padding: 10px 20px;
+            padding: 10px 22px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-size: 15px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
         }
         .btn-primary {
             background: #4299e1;
@@ -163,6 +199,43 @@
             background: #48bb78;
             color: white;
         }
+        .btn-secondary {
+            background: #94a3b8;
+            color: white;
+        }
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+        .modal-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+        }
+        .modal-box h3 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-item {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .form-item input {
+            width: 80px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
         .result-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -174,34 +247,111 @@
         }
         .result-box {
             background: white;
-            padding: 40px;
+            padding: 30px;
             border-radius: 12px;
             width: 90%;
-            max-width: 500px;
+            max-width: 480px;
             text-align: center;
         }
         .result-box h2 {
             margin-bottom: 20px;
+            color: #2d3748;
         }
         .result-score {
-            font-size: 36px;
+            font-size: 40px;
             font-weight: bold;
             color: #4299e1;
             margin: 20px 0;
         }
-        .hide {
+        #scoreDetail {
+            line-height: 1.8;
+            font-size: 15px;
+            color: #4a5568;
+        }
+        .wrong-book-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
             display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+        .wrong-book-box {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 95%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .tab {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            background: #4299e1;
+            color: white;
+            border-color: #4299e1;
+        }
+        .wrong-item {
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        .wrong-q {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .wrong-opt {
+            margin: 4px 0;
+            padding-left: 10px;
+        }
+        .wrong-my {
+            color: #dc2626;
+            margin-top: 8px;
+        }
+        .wrong-right {
+            color: #16a34a;
+        }
+        .nav::-webkit-scrollbar,
+        .wrong-book-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        .nav::-webkit-scrollbar-thumb,
+        .wrong-book-box::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 3px;
         }
     </style>
+    <script>
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+        });
+    </script>
 </head>
 <body>
+
 <div class="container">
     <div class="header">
-        <div class="title">C证继续教育模拟考试</div>
-        <div class="timer" id="timer">考试时间：60:00</div>
+        <div class="title">继续教育C证 - 模拟考试</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <button class="btn btn-secondary" id="settingBtn" style="display:none;">考试设置</button>
+            <div class="timer" id="timer">考试时间：60:00</div>
+        </div>
     </div>
 
-    <div class="score-info">
+    <div class="score-info" id="scoreInfo">
         <div>单选题：40题 × 1分 = 40分</div>
         <div>多选题：20题 × 2分 = 40分</div>
         <div>判断题：40题 × 0.5分 = 20分</div>
@@ -215,34 +365,81 @@
         <button class="btn btn-primary" id="prevBtn">上一题</button>
         <button class="btn btn-primary" id="nextBtn">下一题</button>
         <button class="btn btn-danger" id="submitBtn">交卷评分</button>
+        <button class="btn btn-success" id="wrongBookBtn" style="display:none;">查看错题</button>
         <button class="btn btn-success" id="restartBtn" style="display:none;">重新考试</button>
     </div>
 </div>
 
+<!-- 初始化设置弹窗（默认显示） -->
+<div class="modal" id="initModal">
+    <div class="modal-box">
+        <h3>考试设置</h3>
+        <div class="form-item">
+            <span>单选题数量：</span>
+            <input type="number" id="setSingleCount" min="1" value="40">
+        </div>
+        <div class="form-item">
+            <span>单选题每题分数：</span>
+            <input type="number" id="setSingleScore" min="0.1" step="0.1" value="1">
+        </div>
+        <div class="form-item">
+            <span>多选题数量：</span>
+            <input type="number" id="setMultiCount" min="1" value="20">
+        </div>
+        <div class="form-item">
+            <span>多选题每题分数：</span>
+            <input type="number" id="setMultiScore" min="0.1" step="0.1" value="2">
+        </div>
+        <div class="form-item">
+            <span>判断题数量：</span>
+            <input type="number" id="setJudgeCount" min="1" value="40">
+        </div>
+        <div class="form-item">
+            <span>判断题每题分数：</span>
+            <input type="number" id="setJudgeScore" min="0.1" step="0.1" value="0.5">
+        </div>
+        <div class="form-item">
+            <span>考试时长（分钟）：</span>
+            <input type="number" id="setExamMinutes" min="1" value="60">
+        </div>
+        <div style="text-align:center;margin-top:20px;">
+            <button class="btn btn-primary" id="startExamBtn">开始考试</button>
+        </div>
+    </div>
+</div>
+
+<!-- 成绩弹窗 -->
 <div class="result-modal" id="resultModal">
     <div class="result-box">
         <h2>考试成绩</h2>
         <div class="result-score" id="finalScore">0</div>
         <div id="scoreDetail"></div>
-        <button class="btn btn-primary" style="margin-top:20px;" onclick="closeResult()">关闭</button>
+        <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;">
+            <button class="btn btn-primary" onclick="closeResult()">关闭</button>
+            <button class="btn btn-success" id="goWrongBook">查看错题</button>
+        </div>
+    </div>
+</div>
+
+<!-- 错题本 -->
+<div class="wrong-book-modal" id="wrongBookModal">
+    <div class="wrong-book-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+            <h3>本次考试错题本</h3>
+            <button class="btn btn-secondary" onclick="closeWrongBook()">返回</button>
+        </div>
+        <div class="tab">
+            <button class="tab-btn active" data-type="single">单选题</button>
+            <button class="tab-btn" data-type="multiple">多选题</button>
+            <button class="tab-btn" data-type="judge">判断题</button>
+        </div>
+        <div id="wrongList"></div>
     </div>
 </div>
 
 <script>
-// ===================== 题库区域（请把你的1000题完整贴在这里）=====================
+// ===================== 题库区域 =====================
 const questionBank = {
-    // single: [  // 单选题 1-400
-    //     {id:1, q:"社会主义中国的安全生产管理离不开党的领导和()引导？", opt:["规章制度","自治条例","国家法规政策","地方性法规"], ans:"C"},
-    //     {id:2, q:"党和政府把人民群众()放在首位？", opt:["财产安全","生命安全身体健康","工作稳定","收入水平"], ans:"B"},
-    // ],
-    // multiple: [ // 多选题 401-600
-    //     {id:401, q:"人的工作动力来自于？", opt:["内在动力","外在压力","吸引力","专注力"], ans:"ABC"},
-    //     {id:402, q:"安全生产管理包括？", opt:["法规","理论","监管","实践"], ans:"ABCD"},
-    // ],
-    // judge: [   // 判断题 601-1000
-    //     {id:601, q:"安全生产管理包含四个部分？", opt:["正确","错误"], ans:"A"},
-    //     {id:602, q:"安全第一是生产基本原则？", opt:["正确","错误"], ans:"A"},
-    // ]
     single: [ 
         {id: 1, q: "社会主义中国的安全生产管理,离不开中国共产党的领导和()的引导｡", opt: [
                 "规章制度",
@@ -8627,27 +8824,44 @@ const questionBank = {
     ]
 
 };
-// ============================================================================
 
-// 考试配置
-const config = {
-    singleCount: 40,  singleScore: 1,
+
+// ====================================================
+
+let config = JSON.parse(localStorage.getItem('examConfig')) || {
+    singleCount: 40, singleScore: 1,
     multipleCount:20, multipleScore:2,
-    judgeCount:40,   judgeScore:0.5
+    judgeCount:40, judgeScore:0.5,
+    examMinutes: 60
 };
 
-// 全局变量
 let examPaper = [], userAnswers = {}, currentIndex = 0, timerInterval, seconds = 3600;
 let isSubmitted = false;
-let correctRecord = [];
+let correctRecord = [], wrongList = [];
 
-// 随机抽取题目
+function saveConfig(){
+    localStorage.setItem('examConfig', JSON.stringify(config));
+    renderScoreInfo();
+}
+
+function renderScoreInfo(){
+    const s = config.singleCount * config.singleScore;
+    const m = config.multipleCount * config.multipleScore;
+    const j = config.judgeCount * config.judgeScore;
+    const total = s+m+j;
+    document.getElementById('scoreInfo').innerHTML = `
+        <div>单选题：${config.singleCount}题 × ${config.singleScore}分 = ${s}分</div>
+        <div>多选题：${config.multipleCount}题 × ${config.multipleScore}分 = ${m}分</div>
+        <div>判断题：${config.judgeCount}题 × ${config.judgeScore}分 = ${j}分</div>
+        <div>总分：${total}分</div>
+    `;
+}
+
 function getRandomItems(arr, count) {
     const shuffled = [...arr].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
 }
 
-// 生成试卷
 function generatePaper() {
     const singles = getRandomItems(questionBank.single, config.singleCount);
     const multiples = getRandomItems(questionBank.multiple, config.multipleCount);
@@ -8660,16 +8874,18 @@ function generatePaper() {
     examPaper = [...singles, ...multiples, ...judges];
     userAnswers = {};
     correctRecord = [];
+    wrongList = [];
     currentIndex = 0;
     isSubmitted = false;
     renderNav();
     renderQuestion();
     startTimer();
+    
     document.getElementById("restartBtn").style.display = "none";
     document.getElementById("submitBtn").style.display = "inline-block";
+    document.getElementById("wrongBookBtn").style.display = "none";
 }
 
-// 渲染导航
 function renderNav() {
     const nav = document.getElementById("nav");
     nav.innerHTML = "";
@@ -8677,9 +8893,9 @@ function renderNav() {
         const btn = document.createElement("button");
         let cls = "nav-btn";
         if(i === currentIndex) cls += " active";
+        if(userAnswers[i]) cls += " answered";
         if(isSubmitted){
-            if(correctRecord[i]) cls += " right";
-            else cls += " wrong";
+            cls += correctRecord[i] ? " right" : " wrong";
         }
         btn.className = cls;
         btn.innerText = i + 1;
@@ -8688,14 +8904,10 @@ function renderNav() {
     });
 }
 
-// 渲染题目
 function renderQuestion() {
     const box = document.getElementById("questionBox");
     const q = examPaper[currentIndex];
-    let typeName = "";
-    if(q.type==="single") typeName="【单选题】";
-    if(q.type==="multiple") typeName="【多选题】";
-    if(q.type==="judge") typeName="【判断题】";
+    let typeName = {single:"【单选题】",multiple:"【多选题】",judge:"【判断题】"}[q.type];
 
     let optHtml = "";
     q.opt.forEach((item, i) => {
@@ -8708,40 +8920,30 @@ function renderQuestion() {
             if(q.ans.includes(key)) optClass += " right-ans";
             if(userAnswers[currentIndex]?.includes(key) && !q.ans.includes(key)) optClass += " user-wrong";
         }
-
         optHtml += `<label class="${optClass}"><input type="${type}" name="q${currentIndex}" value="${key}" ${checked} ${isSubmitted?'disabled':''}> ${key}、${item}</label>`;
     });
 
     let ansTip = "";
     if(isSubmitted){
         const isCorr = correctRecord[currentIndex];
-        const tipCls = isCorr ? "right" : "wrong";
-        ansTip = `<div class="q-ans ${tipCls}">
-            ${isCorr ? "✅ 回答正确" : "❌ 回答错误"}　题目序号「${q.id}」 正确答案：${q.ans}
-        </div>`;
+        ansTip = `<div class="q-ans ${isCorr?'right':'wrong'}">${isCorr?"✅正确":"❌错误"}　正确答案：${q.ans}</div>`;
     }
 
-    box.innerHTML = `
-        <div class="q-title">${currentIndex+1}. ${typeName} ${q.q}</div>
-        ${ansTip}
-        <div class="options">${optHtml}</div>
-    `;
+    box.innerHTML = `<div class="q-title">${currentIndex+1}. ${typeName} ${q.q}</div>${ansTip}<div class="options">${optHtml}</div>`;
     renderNav();
 }
 
-// 保存答案
 document.addEventListener("change", e => {
-    if(e.target.name?.startsWith("q") && !isSubmitted){
-        const idx = e.target.name.replace("q","");
-        const all = document.querySelectorAll(`input[name=q${idx}]:checked`);
-        userAnswers[idx] = Array.from(all).map(i => i.value).sort().join("");
-    }
+    if(!e.target.name?.startsWith("q") || isSubmitted) return;
+    const idx = e.target.name.replace("q","");
+    const all = document.querySelectorAll(`input[name=q${idx}]:checked`);
+    userAnswers[idx] = Array.from(all).map(i=>i.value).sort().join("");
+    renderNav();
 });
 
-// 计时器
 function startTimer() {
     clearInterval(timerInterval);
-    seconds = 3600;
+    seconds = config.examMinutes * 60;
     timerInterval = setInterval(() => {
         seconds--;
         const m = String(Math.floor(seconds/60)).padStart(2,"0");
@@ -8751,15 +8953,9 @@ function startTimer() {
     },1000);
 }
 
-// 上下题
-document.getElementById("prevBtn").onclick = () => {
-    if(currentIndex>0){ currentIndex--; renderQuestion(); }
-};
-document.getElementById("nextBtn").onclick = () => {
-    if(currentIndex < examPaper.length-1){ currentIndex++; renderQuestion(); }
-};
+document.getElementById("prevBtn").onclick = () => {if(currentIndex>0){currentIndex--;renderQuestion();}};
+document.getElementById("nextBtn").onclick = () => {if(currentIndex<examPaper.length-1){currentIndex++;renderQuestion();}};
 
-// 交卷判分
 document.getElementById("submitBtn").onclick = submitExam;
 function submitExam() {
     if(isSubmitted) return;
@@ -8768,6 +8964,7 @@ function submitExam() {
     
     let singleSum=0, multiSum=0, judgeSum=0, total=0;
     correctRecord = [];
+    wrongList = [];
 
     examPaper.forEach((q, i) => {
         const user = userAnswers[i] || "";
@@ -8775,47 +8972,105 @@ function submitExam() {
         const correct = user === ans;
         correctRecord[i] = correct;
 
-        if(q.type === "single"){
-            if(correct) singleSum += config.singleScore;
-        } else if(q.type === "multiple"){
-            if(correct) multiSum += config.multipleScore;
-        } else if(q.type === "judge"){
-            if(correct) judgeSum += config.judgeScore;
-        }
+        if(!correct) wrongList.push({index:i, q:q, user:user||"未答", type:q.type});
+        
+        if(q.type === "single") singleSum += correct ? config.singleScore : 0;
+        if(q.type === "multiple") multiSum += correct ? config.multipleScore : 0;
+        if(q.type === "judge") judgeSum += correct ? config.judgeScore : 0;
     });
 
     total = singleSum + multiSum + judgeSum;
     document.getElementById("finalScore").innerText = total.toFixed(1) + " 分";
     document.getElementById("scoreDetail").innerHTML = `
-        单选题：${singleSum}/${config.singleCount*config.singleScore}<br>
-        多选题：${multiSum}/${config.multipleCount*config.multipleScore}<br>
-        判断题：${judgeSum}/${config.judgeCount*config.judgeScore}<br>
+        单选：${singleSum}/${config.singleCount*config.singleScore}<br>
+        多选：${multiSum}/${config.multipleCount*config.multipleScore}<br>
+        判断：${judgeSum}/${config.judgeCount*config.judgeScore}<br>
         <b>总分：${total.toFixed(1)} 分</b>
     `;
     document.getElementById("resultModal").style.display = "flex";
     document.getElementById("restartBtn").style.display = "inline-block";
     document.getElementById("submitBtn").style.display = "none";
-    
+    document.getElementById("wrongBookBtn").style.display = "inline-block";
     renderQuestion();
     renderNav();
 }
 
-// 自动交卷
 function autoSubmit() {
-    alert("考试时间到！系统自动交卷");
+    alert("时间到！自动交卷");
     submitExam();
 }
 
-// 关闭成绩
 function closeResult() {
     document.getElementById("resultModal").style.display = "none";
 }
 
-// 重新考试
-document.getElementById("restartBtn").onclick = generatePaper;
+document.getElementById("restartBtn").onclick = () => {
+    document.getElementById("initModal").style.display = "flex";
+};
 
-// 初始化
-generatePaper();
+// 开始考试
+document.getElementById("startExamBtn").onclick = () => {
+    config.singleCount = Number(document.getElementById("setSingleCount").value);
+    config.singleScore = Number(document.getElementById("setSingleScore").value);
+    config.multipleCount = Number(document.getElementById("setMultiCount").value);
+    config.multipleScore = Number(document.getElementById("setMultiScore").value);
+    config.judgeCount = Number(document.getElementById("setJudgeCount").value);
+    config.judgeScore = Number(document.getElementById("setJudgeScore").value);
+    config.examMinutes = Number(document.getElementById("setExamMinutes").value);
+    
+    saveConfig();
+    document.getElementById("initModal").style.display = "none";
+    generatePaper();
+};
+
+// 错题本
+document.getElementById("goWrongBook").onclick =
+document.getElementById("wrongBookBtn").onclick = () => {
+    closeResult();
+    renderWrongBook("single");
+    document.getElementById("wrongBookModal").style.display = "flex";
+}
+
+function closeWrongBook(){
+    document.getElementById("wrongBookModal").style.display = "none";
+}
+
+document.querySelectorAll(".tab-btn").forEach(t => {
+    t.onclick = () => {
+        document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));
+        t.classList.add("active");
+        renderWrongBook(t.dataset.type);
+    }
+});
+
+function renderWrongBook(type){
+    const list = wrongList.filter(w => w.type === type);
+    const dom = document.getElementById("wrongList");
+    if(list.length === 0){
+        dom.innerHTML = `<div style="text-align:center;padding:30px;">该分类暂无错题</div>`;
+        return;
+    }
+    dom.innerHTML = list.map(item => `
+        <div class="wrong-item">
+            <div class="wrong-q">第${item.index+1}题：${item.q.q}</div>
+            ${item.q.opt.map((o,i)=>`<div class="wrong-opt">${"ABCDE"[i]}、${o}</div>`).join("")}
+            <div class="wrong-my">你的答案：${item.user}</div>
+            <div class="wrong-right">正确答案：${item.q.ans}</div>
+        </div>
+    `).join("");
+}
+
+// 初始化加载配置
+window.onload = () => {
+    document.getElementById("setSingleCount").value = config.singleCount;
+    document.getElementById("setSingleScore").value = config.singleScore;
+    document.getElementById("setMultiCount").value = config.multipleCount;
+    document.getElementById("setMultiScore").value = config.multipleScore;
+    document.getElementById("setJudgeCount").value = config.judgeCount;
+    document.getElementById("setJudgeScore").value = config.judgeScore;
+    document.getElementById("setExamMinutes").value = config.examMinutes;
+    renderScoreInfo();
+};
 </script>
 </body>
 </html>
