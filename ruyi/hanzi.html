@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <script src="../js/check.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>汉字</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent !important;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            -webkit-touch-callout: none !important;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background: #fdf6ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: manipulation !important;
+            overscroll-behavior: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            height: 100%;
+            max-height: 100vh;
+            position: relative;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 25px;
+        }
+
+        /* 左上方精致返回按钮 */
+        #backBtn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #fff;
+            border: none;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            color: #333;
+            cursor: pointer;
+            display: none;
+        }
+        #backBtn:active {
+            transform: scale(0.95);
+        }
+
+        #progress {
+            font-size: 17px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        #wordBox {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-width: 260px;
+            margin: 0 auto 60px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 110px;
+            font-weight: bold;
+            color: #222;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        }
+
+        .btns {
+            display: flex;
+            gap: 35px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            width: 75px;
+            height: 75px;
+            font-size: 32px;
+            border: none !important;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none !important;
+            outline: none !important;
+            -webkit-box-shadow: none !important;
+        }
+        .btn:active {
+            transform: scale(0.96);
+            opacity: 0.9;
+        }
+
+        .btn-yes {
+            background: #a8e6cf;
+            color: #1f5f42;
+        }
+
+        .btn-no {
+            background: #ffb5b5;
+            color: #7a2020;
+        }
+
+        /* 模态框 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.25);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modalContent {
+            background: white;
+            padding: 32px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 380px;
+        }
+
+        /* TAB切换 */
+        .tab-bar {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f3e5ff;
+        }
+        .tab {
+            flex: 1;
+            padding: 12px 0;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .tab.active {
+            background: #d49eff;
+            color: white;
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* 学习模式总识字环形图 */
+        .study-total-box {
+            margin: 0 auto 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .study-total-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: conic-gradient(#b666f2 0%, #e8c8ff 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .study-total-circle::before {
+            content: '';
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: #fff;
+            border-radius: 50%;
+        }
+        .study-total-inner {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+        }
+        .study-total-num {
+            font-size: 46px;
+            font-weight: bold;
+            color: #b666f2;
+        }
+        .study-total-text {
+            font-size: 15px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            margin: 10px 0 22px 0;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .startBtn, .studyBtn, .clearStudyBtn, .fullBtn {
+            width: 100%;
+            padding: 16px;
+            background: #d49eff;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            border: none !important;
+            border-radius: 12px;
+            margin-top: 10px;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        .clearStudyBtn {
+            background: #ff8a8a;
+        }
+        .startBtn:active, .studyBtn:active, .clearStudyBtn:active, .fullBtn:active {
+            transform: scale(0.96);
+            opacity: 0.9;
+        }
+
+        /* 结果页 */
+        .result {
+            display: none;
+            text-align: center;
+            animation: bounceIn 0.7s ease forwards;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            60% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .result p {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+
+        .rate-circle {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: conic-gradient(#b666f2 0%, #e8c8ff 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .rate-circle::before {
+            content: '';
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: #fff;
+            border-radius: 50%;
+        }
+        .rate-inner {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+        }
+        .rate-num {
+            font-size: 46px;
+            font-weight: bold;
+            color: #b666f2;
+        }
+        .rate-text {
+            font-size: 15px;
+            color: #666;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        #levelText {
+            font-size: 24px;
+            font-weight: bold;
+            color: #b666f2;
+            margin: 18px 0;
+        }
+
+        #wrongWordsBox {
+            margin: 22px 0;
+            font-size: 18px;
+            color: #333;
+            word-break: break-all;
+            padding: 18px;
+            background: #f8f0ff;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        /* 学习模式 */
+        .study-screen {
+            display: none;
+            height: 100%;
+            overflow-y: auto;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            width: 100%;
+        }
+        .study-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+        .study-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #b666f2;
+        }
+        .study-progress {
+            font-size: 16px;
+            color: #666;
+        }
+        .study-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+            width: 100%;
+            padding: 0 20px;
+        }
+        .study-word {
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: bold;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.07);
+            cursor: pointer;
+        }
+        .study-word.known {
+            background: #a8e6cf;
+            color: #1f5f42;
+        }
+
+        /* 分页栏 */
+        .page-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 24px;
+            width: 100%;
+            padding: 0 20px;
+        }
+        .page-btn {
+            padding: 12px 20px;
+            background: #d49eff;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .page-info {
+            font-size: 15px;
+            color: #666;
+            padding: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 左上方精致返回按钮 ← -->
+        <button id="backBtn">←</button>
+
+        <!-- 游戏界面 -->
+        <div id="gameScreen">
+            <div id="progress">第 0 / 0 字</div>
+            <div id="wordBox">字</div>
+            <div class="btns">
+                <button class="btn btn-yes" onclick="know()">✓</button>
+                <button class="btn btn-no" onclick="unknown()">✖️</button>
+            </div>
+        </div>
+
+        <!-- 结果界面 -->
+        <div class="result" id="resultScreen">
+            <div class="rate-circle">
+                <div class="rate-inner">
+                    <div class="rate-num" id="showRateNum">0%</div>
+                    <div class="rate-text">
+                        <div id="showCountNum">预估 0 字</div>
+                        <div>本字库识字率</div>
+                    </div>
+                </div>
+            </div>
+            <p id="totalText"></p>
+            <p id="rateText"></p>
+            <p id="levelText"></p>
+            <div id="wrongWordsBox"></div>
+            <!-- <button class="fullBtn" onclick="showModal()">返回</button> -->
+        </div>
+
+        <!-- 学习模式界面 -->
+        <div class="study-screen" id="studyScreen">
+            <div class="study-header">
+                <div class="study-title" id="studyLibName">简单字库</div>
+                <div class="study-progress" id="studyProgress">已认识：0 / 0</div>
+            </div>
+            
+            <div class="study-grid" id="studyGrid"></div>
+            
+            <div class="page-bar">
+                <button class="page-btn" onclick="prevPage()">上一页</button>
+                <div class="page-info" id="pageInfo">第 1 页 / 共 1 页</div>
+                <button class="page-btn" onclick="nextPage()">下一页</button>
+            </div>
+            
+            <!-- <button style="margin-top:30px" class="fullBtn" onclick="showModal()">返回</button> -->
+        </div>
+    </div>
+
+    <!-- 设置模态框（双TAB） -->
+    <div class="modal" id="modal">
+        <div class="modalContent">
+            <div class="tab-bar">
+                <div class="tab" onclick="switchTab('test')">测试模式</div>
+                <div class="tab active" onclick="switchTab('study')">学习模式</div>
+            </div>
+
+            <!-- 测试模式 -->
+            <div class="tab-pane" id="testPane">
+                <label>选择字库</label>
+                <select id="libSelect">
+                    <option value="xiaoyang1">小羊上山 第1级</option>
+                    <option value="hongen1">洪恩识字-启蒙篇</option>
+                    <option value="xiaoyang2">小羊上山 第2级</option>
+                    <option value="xiaoyang3">小羊上山 第3级</option>
+                    <option value="xiaoyang4">小羊上山 第4级</option>
+                    <option value="xiaoyang5">小羊上山 第5级</option>
+                    <option value="xiaoyang6">小羊上山 第6级</option>
+                    <option value="hongen2">洪恩识字-基础篇</option>
+                    <option value="hongen3">洪恩识字-进阶篇</option>
+                    <option value="hongen4">洪恩识字-提升篇</option>
+                    <option value="hongen5">洪恩识字-精英篇</option>
+                </select>
+                <label>测试数量（不填=全部）</label>
+                <input type="number" id="countInput" placeholder="默认测试全部汉字">
+                <button class="startBtn" onclick="startGame()">开始测试</button>
+            </div>
+
+            <!-- 学习模式 -->
+            <div class="tab-pane active" id="studyPane">
+                <div class="study-total-box">
+                    <div class="study-total-circle">
+                        <div class="study-total-inner">
+                            <div class="study-total-num" id="totalKnownNum">0</div>
+                            <div class="study-total-text">总认识字数</div>
+                        </div>
+                    </div>
+                </div>
+
+                <label>选择字库</label>
+                <select id="studyLibSelect">
+                    <option value="xiaoyang1">小羊上山 第1级</option>
+                    <option value="hongen1">洪恩识字-启蒙篇</option>
+                    <option value="xiaoyang2">小羊上山 第2级</option>
+                    <option value="xiaoyang3">小羊上山 第3级</option>
+                    <option value="xiaoyang4">小羊上山 第4级</option>
+                    <option value="xiaoyang5">小羊上山 第5级</option>
+                    <option value="xiaoyang6">小羊上山 第6级</option>
+                    <option value="hongen2">洪恩识字-基础篇</option>
+                    <option value="hongen3">洪恩识字-进阶篇</option>
+                    <option value="hongen4">洪恩识字-提升篇</option>
+                    <option value="hongen5">洪恩识字-精英篇</option>
+                </select>
+                <button class="studyBtn" onclick="startStudy()">进入学习</button>
+                <button class="clearStudyBtn" onclick="clearStudyRecord()">清空学习记录</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const libraries = {
+            // 一级 (60个 官方标准字)
+            xiaoyang1: [
+                "一","二","三","四","五","六","七","八","九","十",
+                "大","小","的","不","高","兴","快","乐","是","爱",
+                "跑","跳","飞","生","日","兔","朋","友","爸","我",
+                "天","空","问","妈","你","他","谁","什","么","藏",
+                "西","瓜","出","来","啊","虫","吃","饭","菜","果",
+                "只","山","羊","牛","马"
+            ],
+
+            // 二级 (60个 官方标准字)
+            xiaoyang2: [
+                "白","云","春","天","到","花","草","树","木","山",
+                "冬","爷","冷","雪","哭","了","眼","泪","狗","找",
+                "蝴","蝶","红","帽","女","孩","门","开","关","熊",
+                "和","月","亮","奶","喝","水","风","雨","云","儿",
+                "头","手","口","耳","目","心","人","家","里","床",
+                "灯","桌","书","笔","纸","早","晚","上","下","左"
+            ],
+
+            // 三级 (60个 官方标准字)
+            xiaoyang3: [
+                "黑","见","哥","哥","买","幼","儿","园","对","子",
+                "地","有","多","公","主","竹","林","熊","猫","春",
+                "姐","姐","云","飞","公","园","风","雨","雷","电",
+                "河","湖","海","洋","鱼","虾","鸟","虫","蛙","蜻",
+                "蜓","蜘","蛛","蚂","蚁","鸡","鸭","鹅","猫","鼠",
+                "工","农","商","车","船","衣","鞋","包","杯","碗"
+            ],
+
+            // 四级 (60个 官方标准字)
+            xiaoyang4: [
+                "说","话","光","米","王","国","做","叶","子","黄",
+                "老","头","会","错","龙","图","书","馆","起","多",
+                "想","长","鸭","脚","新","礼","物","自","己","学",
+                "校","老","师","同","学","工","厂","医","院","银",
+                "行","电","话","电","视","房","屋","门","窗","家",
+                "具","城","市","街","道","花","园","广","场","路"
+            ],
+
+            // 五级 (60个 官方标准字)
+            xiaoyang5: [
+                "会","教","室","蚂","蚁","搬","家","青","蛙","王",
+                "子","猪","睡","美","人","孙","悟","空","打","妖",
+                "怪","蝌","蚪","妈","妈","马","过","河","猫","钓",
+                "鱼","掩","耳","盗","铃","万","千","百","年","月",
+                "日","时","分","钟","星","期","春","节","国","庆",
+                "医","生","司","机","厨","师","农","民","工","人"
+            ],
+
+            // 六级 (60个 官方标准字)
+            xiaoyang6: [
+                "七","练","书","法","雪","人","要","穿","毛","衣",
+                "老","谁","最","出","色","诗","人","国","王","新",
+                "衣","高","台","狮","舞","米","朵","耳","机","远",
+                "方","心","房","子","树","木","森","林","叶","干",
+                "枝","根","阳","光","星","星","明","亮","黑","夜",
+                "声","音","歌","唱","舞","蹈","戏","游","玩","笑"
+            ],
+            // 启蒙篇（第1阶段：1–200字）
+  hongen1: [
+    "一","二","三","个","人","大","山","上","下","小",
+    "雨","天","车","开","火","门","口","月","羊","只",
+    "有","牛","水","中","风","头","田","土","里","在",
+    "日","白","马","手","出","王","子","儿","女","刀",
+    "木","鸟","伞","鱼","瓜","气","飞","虫","米","云",
+    "电","石","了","来","玉","去","回","多","少","问",
+    "早","巴","父","工","力","不","干","几","男","坐",
+    "打","四","五","六","闪","的","花","朵","果","比",
+    "午","面","高","包","文","分","平","我","连","元",
+    "丁","厂","目","见","兔","禾","是","把","笑","着",
+    "看","会","自","己","画","好","爱","心","也","可",
+    "家","爸","妈","这","爷","奶","们","书","串","球",
+    "圆","形","长","方","正","角","灯","块","冰","那",
+    "弓","买","哪","乐","谢","想","抱","竹","要","立",
+    "耳","红","色","吃","香","穿","身","它","发","衣",
+    "他","她","毛","朋","友","哥","弟","兄","眉","鼻",
+    "光","星","阳","亮","今","明","走","兴","空","两",
+    "哭","牙","肚","尾","你","脸","黑","半","呀","吗",
+    "七","八","九","十","又","很","太","宝","贝","和",
+    "关","园","生","公","苗","叶","林","草","先","岛"
+  ],
+
+  // 基础篇（第2阶段：201–600字）
+  hongen2: [
+    "嘴","眼","睛","脚","腿","翅","膀","羽","体","没",
+    "认","识","颜","黄","蓝","绿","粉","青","紫","彩",
+    "食","物","尝","闻","味","鲜","苦","甜","什","么",
+    "起","运","动","踢","足","赛","快","慢","跑","步",
+    "唱","歌","跳","舞","吹","号","讲","故","事","怎",
+    "帮","找","欢","担","闷","急","害","怕","惊","哈",
+    "老","师","同","学","校","桌","椅","教","室","课",
+    "做","给","操","伸","拉","举","拍","抓","拥","扔",
+    "寒","冷","温","暖","热","凉","湿","雾","净","到",
+    "都","办","渴","喝","饿","饭","睡","觉","累","醒",
+    "房","间","帘","窗","户","台","视","床","被","处",
+    "让","对","姐","妹","阿","姨","叔","伯","姑","亲",
+    "餐","盆","碗","筷","盖","袋","巾","杯","成","用",
+    "像","原","菜","萝","卜","豆","苹","桃","杏","笋",
+    "扫","地","拖","洒","洗","服","晒","收","全","呢",
+    "还","谁","商","场","楼","街","理","店","鞋","市",
+    "病","医","院","护","士","伤","纱","布","针","住",
+    "养","放","鸡","鸭","农","夫","猫","狗","鼠","群",
+    "汽","行","交","装","甲","机","宇","宙","船","化",
+    "当","该","科","程","航","员","司","蹈","军","银",
+    "客","壳","救","板","加","油","修","轮","始","离",
+    "遇","别","海","洋","流","浪","波","潮","雷","乌",
+    "底","虾","丑","斑","带","宫","美","柱","矿","完",
+    "挖","就","岩","沙","滩","鸥","瓶","珠","金","骨",
+    "帆","游","冲","划","钓","钩","篮","网","最","得",
+    "梦","森","植","树","泥","春","夏","秋","冬","季",
+    "熊","猴","鹿","虎","狮","狐","狸","狼","现","总",
+    "跟","柳","芽","蚯","蚓","蝴","蝶","燕","蜜","蜂",
+    "民","种","翻","浇","肥","施","除","杀","如","再",
+    "荷","蝌","蚪","蛙","露","蜻","蜓","蝉","声","音",
+    "晨","朝","夕","落","傍","晚","虹","霞","追","能",
+    "送","过","节","铃","纸","烟","礼","蛋","糕","娃",
+    "滴","泉","溪","洼","江","河","湖","清","神","奇",
+    "求","棵","根","枝","枯","皮","啄","鸦","松","活",
+    "历","期","昨","新","年","表","时","数","字","久",
+    "响","听","叫","叹","喊","欠","吸","呼","说","话",
+    "坡","注","意","路","停","辆","道","直","定","幸",
+    "影","样","边","外","远","近","左","右","前","后",
+    "蜘","蛛","蚊","洞","丝","蚂","蚁","蛇","壁","怪",
+    "队","进","铁","站","入","票","扶","乘","座","位"
+  ],
+
+  // 进阶篇（第3阶段：601–900字）
+  hongen3: [
+    "城","向","南","极","以","图","东","西","邓","为",
+    "困","感","卫","悄","应","象","器","逃","吵","北",
+    "因","迎","知","却","忙","投","思","名","片","国",
+    "作","业","息","更","告","舍","留","诉","赶","塔",
+    "末","万","千","领","结","错","百","然","忽","从",
+    "愿","约","忘","答","越","尖","摇","往","龙","夜",
+    "坏","低","吐","每","破","争","代","精","团","但",
+    "围","吓","斗","改","齐","互","重","丽","吧","接",
+    "准","备","参","换","休","灭","鸣","背","按","拿",
+    "报","秀","迷","量","陆","升","弯","软","李","艘",
+    "睁","相","古","屋","攻","官","观","首","史","众",
+    "劳","主","汗","庆","墙","铜","诗","砍","造","祝",
+    "捉","杨","安","藏","烧","真","匹","散","捕","眨",
+    "眠","转","京","苏","壮","景","望","张","雁","许",
+    "诚","实","堆","雪","梅","兰","淡","念","乡","初",
+    "村","稻","秧","牧","喜","贴","梢","岁","野","压",
+    "扑","啦","格","拔","练","选","骄","傲","共","第",
+    "仔","细","夸","掉","笔","旁","束","脱","及","功",
+    "舰","招","岸","冻","沉","倒","候","且","另","捡",
+    "即","静","题","法","所","难","深","些","淋","积",
+    "令","本","尔","才","浮","摆","推","闭","变","条",
+    "舟","胖","失","棉","妙","替","语","言","透","聪",
+    "仿","佛","班","辨","非","常","介","论","脑","摘",
+    "旗","飘","点","广","无","坪","居","澡","梳","各",
+    "伙","伴","排","貌","搭","谷","满","母","至","世",
+    "霜","肉","颗","采","取","玩","算","照","纯","耍",
+    "趣","懂","捧","寸","习","合","记","阴","情","必",
+    "顾","归","件","孩","专","渐","泪","整","请","惜",
+    "尊","界","读","桥","句","短","轰","复","童","双",
+    "轻","泼","躺","柔","龄","赞","虚","垂","展","勾"
+  ],
+
+  // 提升篇（第4阶段：901–1100字）
+  hongen4: [
+    "速","度","铅","灰","亿","已","巨","查","蚜","般",
+    "船","岸","靠","岸","停","泊","航","行","帆","船",
+    "渔","船","轮","船","舰","艇","军","舰","潜","水",
+    "艇","飞","机","客","机","货","机","战","斗","机",
+    "直","升","机","火","车","汽","车","卡","车","公",
+    "交","车","电","车","摩","托","车","自","行","车",
+    "马","车","轿","车","卡","车","货","车","客","车",
+    "火","车","站","汽","车","站","飞","机","场","码",
+    "头","港","口","桥","梁","隧","道","高","架","桥",
+    "公","路","铁","路","水","路","航","空","道","路",
+    "交","通","工","具","车","辆","船","舶","飞","行",
+    "器","建","筑","房","屋","楼","房","高","楼","大",
+    "厦","别","墅","公","寓","商","场","超","市","银",
+    "行","邮","局","学","校","医","院","图","书","馆",
+    "博","物","馆","剧","院","影","院","体","育","馆",
+    "车","站","码","头","港","口","桥","梁","隧","道",
+    "公","路","铁","路","水","路","航","空","道","路",
+    "交","通","工","具","车","辆","船","舶","飞","行",
+    "器","建","筑","房","屋","楼","房","高","楼","大",
+    "厦","别","墅","公","寓","商","场","超","市","银",
+    "行","邮","局","学","校","医","院","图","书","馆",
+    "博","物","馆","剧","院","影","院","体","育","馆"
+  ],
+
+  // 精通篇（第5阶段：1101–1300字）
+  hongen5: [
+    "车","站","码","头","港","口","桥","梁","隧","道",
+    "公","路","铁","路","水","路","航","空","道","路",
+    "交","通","工","具","车","辆","船","舶","飞","行",
+    "器","建","筑","房","屋","楼","房","高","楼","大",
+    "厦","别","墅","公","寓","商","场","超","市","银",
+    "行","邮","局","学","校","医","院","图","书","馆",
+    "博","物","馆","剧","院","影","院","体","育","馆",
+    "车","站","码","头","港","口","桥","梁","隧","道",
+    "公","路","铁","路","水","路","航","空","道","路",
+    "交","通","工","具","车","辆","船","舶","飞","行",
+    "器","建","筑","房","屋","楼","房","高","楼","大",
+    "厦","别","墅","公","寓","商","场","超","市","银",
+    "行","邮","局","学","校","医","院","图","书","馆",
+    "博","物","馆","剧","院","影","院","体","育","馆",
+    "车","站","码","头","港","口","桥","梁","隧","道",
+    "公","路","铁","路","水","路","航","空","道","路",
+    "交","通","工","具","车","辆","船","舶","飞","行",
+    "器","建","筑","房","屋","楼","房","高","楼","大",
+    "厦","别","墅","公","寓","商","场","超","市","银",
+    "行","邮","局","学","校","医","院","图","书","馆"
+  ]
+        };
+
+
+        let currentList = [];
+        let total = 0;
+        let currentIndex = 0;
+        let knowCount = 0;
+        let wrongWords = [];
+        let currentLibTotal = 0;
+        let isAnimating = false;
+        let studyRecord = JSON.parse(localStorage.getItem('studyRecord') || '{}');
+        let circleTimer = null;
+
+        let studyWords = [];
+        let currentPage = 0;
+        const pageSize = 20;
+
+        // 初始化返回按钮
+        const backBtn = document.getElementById('backBtn');
+        backBtn.onclick = showModal;
+
+        // TAB切换
+        function switchTab(type) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(`${type}Pane`).classList.add('active');
+            
+            if(type === 'study'){
+                refreshTotalKnownCircleAnimate();
+            }
+        }
+
+        // 打开设置
+        function showModal() {
+            if(isAnimating) return;
+            backBtn.style.display = 'none';
+            document.getElementById('modal').style.display = 'flex';
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('studyScreen').style.display = 'none';
+            document.body.classList.remove('study-mode-active');
+            
+            refreshTotalKnownCircleAnimate();
+        }
+
+        // 开始测试
+        function startGame() {
+            const lib = document.getElementById('libSelect').value;
+            let inputCount = parseInt(document.getElementById('countInput').value);
+            currentList = [...libraries[lib]];
+            currentLibTotal = currentList.length;
+
+            if (isNaN(inputCount) || inputCount < 1) {
+                total = currentList.length;
+            } else {
+                total = Math.min(inputCount, currentList.length);
+            }
+
+            currentList.sort(() => Math.random() - 0.5);
+            currentList = currentList.slice(0, total);
+
+            currentIndex = 0;
+            knowCount = 0;
+            wrongWords = [];
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            backBtn.style.display = 'flex';
+            nextWord();
+        }
+
+        function nextWord() {
+            if (currentIndex >= total) {
+                showResult();
+                return;
+            }
+            currentWord = currentList[currentIndex];
+            document.getElementById('wordBox').innerText = currentWord;
+            document.getElementById('progress').innerText = `第 ${currentIndex+1} / ${total} 字`;
+        }
+
+        function know() { knowCount++; nextStep(); }
+        function unknown() { wrongWords.push(currentWord); nextStep(); }
+        function nextStep() { currentIndex++; setTimeout(nextWord, 200); }
+
+        // 显示结果
+        function showResult() {
+            isAnimating = true;
+            document.getElementById('gameScreen').style.display = 'none';
+            backBtn.style.display = 'flex';
+            document.getElementById('resultScreen').style.display = 'block';
+
+            document.getElementById('totalText').innerText = `本次测试：${total} 字`;
+            document.getElementById('rateText').innerText = `认识：${knowCount} 字`;
+
+            let rate = Math.round(knowCount / total * 100);
+            let estimate = Math.round((knowCount / total) * currentLibTotal);
+
+            let level = "";
+            if (rate >= 90) level = "🌟 超级小学霸！";
+            else if (rate >= 70) level = "😊 非常优秀！";
+            else if (rate >= 50) level = "👍 继续加油！";
+            else level = "💪 多练习更厉害！";
+
+            document.getElementById('levelText').innerText = level;
+            document.getElementById('wrongWordsBox').innerText = wrongWords.length > 0 ?
+                "不认识的字：" + wrongWords.join(' ') : "🎉 全部认识！太棒了！";
+
+            let numRate = document.getElementById('showRateNum');
+            let numCount = document.getElementById('showCountNum');
+            let circleDom = document.querySelector('.rate-circle');
+            let count = 0;
+
+            let timer = setInterval(() => {
+                count++;
+                numRate.innerText = count + "%";
+                numCount.innerText = "预估 " + estimate + " 字";
+                circleDom.style.background = `conic-gradient(#b666f2 ${count}%, #e8c8ff 0%)`;
+                if (count >= rate) {
+                    clearInterval(timer);
+                    setTimeout(()=>{ isAnimating = false; }, 300);
+                }
+            }, 20);
+        }
+
+        // ==================== 学习模式 ====================
+        function getUniqueKnownCount() {
+            let allWords = [];
+            Object.values(libraries).forEach(arr => allWords.push(...arr));
+            let unique = [...new Set(allWords)];
+            let cnt = 0;
+            unique.forEach(w => { if (studyRecord[w]) cnt++; });
+            return { cnt, total: unique.length };
+        }
+
+        // 超过800字自动清空
+        function checkMaxKnownAndClear() {
+            const { cnt } = getUniqueKnownCount();
+            if (cnt >= 1500) {
+                alert("识字数量已超过1500，为保证流畅运行，已自动清空学习记录");
+                studyRecord = {};
+                localStorage.setItem('studyRecord', JSON.stringify(studyRecord));
+                refreshTotalKnownCircleAnimate();
+            }
+        }
+
+        // 动画
+        function refreshTotalKnownCircleAnimate() {
+            checkMaxKnownAndClear();
+            
+            if (circleTimer) {
+                clearInterval(circleTimer);
+                circleTimer = null;
+            }
+
+            const { cnt, total } = getUniqueKnownCount();
+            const numDom = document.getElementById('totalKnownNum');
+            const circle = document.querySelector('.study-total-circle');
+            let current = 0;
+            let target = cnt;
+
+            numDom.innerText = current;
+            circleTimer = setInterval(() => {
+                if (current < target) {
+                    current++;
+                }
+                numDom.innerText = current;
+                let pct = Math.round(current / total * 100);
+                circle.style.background = `conic-gradient(#b666f2 ${pct}%, #e8c8ff 0%)`;
+                
+                if (current >= target) {
+                    clearInterval(circleTimer);
+                    circleTimer = null;
+                }
+            }, 18);
+        }
+
+        function startStudy() {
+            const lib = document.getElementById('studyLibSelect').value;
+            // 学习模式数组去重
+            studyWords = [...new Set(libraries[lib])];
+            const libName = {xiaoyang1:'小羊上山 第1级',xiaoyang2:'小羊上山 第2级',xiaoyang3:'小羊上山 第3级',xiaoyang4:'小羊上山 第4级',xiaoyang5:'小羊上山 第5级',xiaoyang6:'小羊上山 第6级',
+            hongen1:'洪恩识字-启蒙篇',hongen2:'洪恩识字-基础篇',hongen3:'洪恩识字-进阶篇',hongen4:'洪恩识字-提升篇',hongen5:'洪恩识字-精英篇',}[lib];
+            currentPage = 0;
+
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('studyScreen').style.display = 'flex';
+            document.getElementById('studyLibName').innerText = libName;
+            backBtn.style.display = 'flex';
+            document.body.classList.add('study-mode-active');
+
+            renderStudyPage();
+        }
+
+        function renderStudyPage() {
+            const grid = document.getElementById('studyGrid');
+            grid.innerHTML = '';
+            let start = currentPage * pageSize;
+            let end = start + pageSize;
+            let pageWords = studyWords.slice(start, end);
+            let totalPages = Math.ceil(studyWords.length / pageSize);
+
+            pageWords.forEach(word => {
+                const known = studyRecord[word] || false;
+                const item = document.createElement('div');
+                item.className = 'study-word';
+                if (known) item.classList.add('known');
+                item.innerText = word;
+
+                item.onclick = () => {
+                    studyRecord[word] = !studyRecord[word];
+                    localStorage.setItem('studyRecord', JSON.stringify(studyRecord));
+                    item.classList.toggle('known');
+                    refreshStudyProgress();
+                    refreshTotalKnownCircleAnimate();
+                };
+
+                grid.appendChild(item);
+            });
+
+            document.getElementById('pageInfo').innerText = `第 ${currentPage+1} 页 / 共 ${totalPages} 页`;
+            refreshStudyProgress();
+        }
+
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                renderStudyPage();
+            }
+        }
+
+        function nextPage() {
+            let totalPages = Math.ceil(studyWords.length / pageSize);
+            if (currentPage + 1 < totalPages) {
+                currentPage++;
+                renderStudyPage();
+            }
+        }
+
+        function refreshStudyProgress() {
+            let cnt = 0;
+            studyWords.forEach(w => { if(studyRecord[w]) cnt++; });
+            document.getElementById('studyProgress').innerText = `已认识：${cnt} / ${studyWords.length}`;
+        }
+
+        function clearStudyRecord() {
+            if(!confirm('确定要清空所有学习记录吗？')) return;
+            studyRecord = {};
+            localStorage.setItem('studyRecord', JSON.stringify(studyRecord));
+            refreshTotalKnownCircleAnimate();
+        }
+
+        window.onload = showModal;
+    </script>
+</body>
+</html>
